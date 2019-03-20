@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title><![CDATA[Rasterization-Bresenham, scan line method]]></title>
+    <url>%2F2019%2F03%2F20%2FRasterization-Bresenham%2C%20scan%20line%20method%2F</url>
+    <content type="text"><![CDATA[几种光栅化算法，主要是直线的Bresenham算法，还有多边形的扫描线算法，填充等 DDA想了想还是先提一句DDA吧，这个也是经典了 DDA就是简单的数值微分然后拟合的算法，它的原型大致过程如下： 给两个点 $(x_1, y_1)，(x_2, y_2)$ 可以得到一个直线的表达式 $y=mx+b$ 每次推进一个$x$，即每次 $x=x+1$，然后计算 $y=mx+b$ 的值，每次要进行取整； 如果 $m&gt;1$，那么可以选择每次将 $y$ 推进1格。 通常来说，DDA对上述过程做了一定的优化，每次不需要都计算 $y=mx+b$ 了，而是选择如下的公式计算： x_{k+1}=x_k+1；\\ y_{k+1}=y_k+m；到了 $m&gt;1$ 时就换成 $x_{k+1}=x_k+\frac{1}{m}$ 就好了，计算出结果以后取整作为像素点的坐标值。 看起来好了很多，但是还是要涉及到浮点数的运算，还有不少的取整操作，对于计算机来说实在是有点困难（因为会算的很多，浮点总是要慢一些的，还会涉及到一定的舍入误差累计）。 Bresenham算法感谢Bresenham老爷子提出的这个Bresenham算法，现在这基本上是所有直线算法的标准了，一般都会直接集成到硬件里。 可以看出来，每次选下一个点都是在 $(x_k+1, y_k+1)$ 和 $(x_k + 1, y_k)$ 之间选取，到底选哪个要看直线到底在这个x坐标下，离哪个更近一些。 我们把上下的距离分别标注为 $ d{upper} $ 和 $d{lower}$ ，当下边比较大的时候，就要选取上边的点，所以我们让他们相减，代入直线公式可以得到 d_{lower} - d_{upper} = 2m(x_i + 1) - 2\overline{y_i} + 2B - 1我们已经知道了 $\Delta x = x{end} - x{start} $ 是一个正值，所以我们可以把这个乘到上式，不会影响正负。 p_i = 2\Delta y \cdot x_i - 2\Delta x\cdot \overline{y_i} + c 这里 $\Delta x= x{end} - x{start}， \Delta y = y{end} - y{start}，m=\Delta y/ \Delta x$ ​ $c=(2B-1)\Delta x + 2 \Delta y$； 然后我们可以代入算出来 \begin{align} \mathrm { p } _ { 0 } &= 2 \Delta \mathrm { y } \bullet x _ { 0 } - 2 \mathrm { x } \bullet \overline { y } _ { 0 } + ( 2 B - 1 ) \Delta x + 2 \Delta y \\ &= 2 \Delta y \bullet x _ { 0 } - 2 \left( \Delta y \bullet x _ { 0 } + B \bullet \Delta x \right) + ( 2 B - 1 ) \Delta x + 2 \Delta y \\ &= 2 \Delta y - \Delta x \end{align}第二步代入了直线方程 要注意这个公式只有 $p_0​$ 可以这样推导出来，因为 $\overline {y_0} = mx_0 + B​$，而其他的 $y_i​$ 就不能这么简单的算出来了。 $\overline{y_i}$ 就是在 $i$ 这个点处，光栅化以后的纵坐标的值 还可以进一步的化简 \begin{aligned} p_{i+1} - p_{i} & = \left( 2 \Delta y \bullet x _ { i + 1 } - 2 \Delta x \cdot \overline { y } _ { i + 1 } + c \right) - \left( 2 \Delta y \bullet x _ { i } - 2 \Delta x \bullet \overline { y } _ { i } + c \right) \\ & = 2 \Delta y - 2 \Delta x \left( \overline { y } _ { i + 1 } - \overline { y } _ { i } \right) \end{aligned} 这里如果 $pi \leq 0$，那么 $\overline {y{i+1}} - \overline{yi} = 0$，那么 $p{i+1} = p_{i} + 2 \Delta y$； 这里如果 $pi &gt; 0$，那么 $\overline {y{i+1}} - \overline{yi} = 1$，那么 $p{i+1} = p_{i} + 2 \Delta y - 2 \Delta x$； 简直是神器啊，得到这个以后就可以开始计算了，全是整数，不浮点不取整不舍入，还是拟合效果最棒的，贴一张图看个例子： 多边形的填充接下来是更复杂的部分了]]></content>
+      <categories>
+        <category>CG</category>
+      </categories>
+      <tags>
+        <tag>Algorithm</tag>
+        <tag>CG</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[系统分析与设计作业1]]></title>
+    <url>%2F2019%2F03%2F12%2F%E7%B3%BB%E7%BB%9F%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%E4%BD%9C%E4%B8%9A1%2F</url>
+    <content type="text"><![CDATA[系统分析与设计的第一次作业 系统分析与设计作业 1简答1. 软件工程的定义首先翻译一下来自Wikipedia的定义：软件工程是进行软件开发，操作和维护的一种系统化，规范化，可量化的方法，是工程实践在软件开发上的应用和研究。按照我自己的理解，软件工程就是对于软件开发的每一个步骤（开发，操作，维护，成本……）的一个全方位的考量，是管理一款软件全部生产流程的学科。 2. 解释导致 software crisis 本质原因、表现，述说克服软件危机的方法 本质原因：随着计算机的发展，软件的需求越来越复杂，软件规模变得越来越大，计算能力依照摩尔定律进行提升，因此落后的软件生产方式无法控制满足这样的需求，因此产生了软件危机； 表现：比如软件开发进度难以预测，软件开发成本难以控制，用户对产品功能难以满足，软件产品质量无法保证，软件产品难以维护，软件缺少适当的文档资料等； 客服软件危机的方法：首先要引入先进的管理办法，这就是软件工程要学习的内容； 3. 软件生命周期就是对软件开发的各个过程进行了划分，主要可以划分为以下的几个阶段： 可行性分析与计划，需求分析，设计，编码实现，测试，运行和维护 人们又建立了不同的软件生命周期模型，比如瀑布法，划分了五个过程（Requirement需求；Design设计；Implementation编码实现；Verification验证测试；Maintenance维护），其它的模型有不同的划分； 4. SWEBoK 的 15 个知识域（An Overview of the SWEBOK Guide 请中文翻译其名称与简短说明）2 软件工程实践中的知识领域 2.1 Software Requirements 软件要求涉及软件要求的启发、协商、分析、规范和验证。软件行业普遍承认, 当软件工程项目执行不力时, 这些项目就会非常脆弱。软件需求表达了对软件产品的需求和限制, 这些需求和约束有助于解决一些现实世界的问题。 2.2 Software Design 软件设计设计系统或组件的体系结构、组件、接口和其他特征的过程和结果 (ieee 1991)。 2.3 Software Construction 软件构建指通过详细设计、编码、单元测试、集成测试、调试和验证相结合的方式, 详细创建工作软件。 2.4 Software Testing 软件测试测试是一项通过识别缺陷来评估产品质量和改进产品质量的活动。软件测试涉及针对有限的测试用例集上的预期行为对程序的行为进行动态验证。 2.5 Software Maintenance 软件维护软件维护包括增强现有功能、调整软件以在新的和改进的操作环境中运行以及纠正缺陷。 2.6 Software Configuration Management 软件配置管理软件配置管理 (scm) 是在不同时间点识别系统配置的学科, 目的是系统地控制对配置的更改, 以及维护完整性和在整个软件生命周期中配置的可追溯性。 2.7 Software Engineering Management 软件工程管理软件工程管理包括规划、协调、测量、报告和控制项目或计划, 以确保软件的开发和维护是系统的、有纪律的和量化的。 2.8 Software Engineering Process 软件工程过程软件工程负责软件生命周期过程的定义、实施、评估、测量、管理和改进。 2.9 Software Engineering Models and Methods 软件工程模型与方法软件工程模型和方法 ka 解决了包含多个生命周期阶段的方法。 2.10 Software Quality 软件质量软件质量是一个普遍存在的软件生命周期问题。 2.11 Software Engineering Professional Practice 软件工程专业实践软件工程专业实践涉及软件工程师以专业、负责和合乎道德的方式实践软件工程所必须具备的知识、技能和态度。 3 Knowledge Areas Characterizing the Educational Requirements of Software Engineering 软件工程教育要求知识领域 3.1 Software Engineering Economics 软件工程经济学软件工程经济学负责在业务环境中做出决策, 使技术决策与组织的业务目标保持一致。 3.2 Computing Foundations 计算基础涵盖了提供软件工程实践所需的计算背景的基本主题。所涉及的主题包括问题解决技术、抽象、算法和复杂性、编程基础知识、并行和分布式计算的基础知识、计算机组织、操作系统和网络通信。 3.3 Mathematical Foundations 数学基础为软件工程的实践提供必要的数学背景； 3.4 Engineering Foundations 工程基础涵盖了为软件工程实践提供必要的工程背景的基本主题。 5. 简单解释 CMMI 的五个级别。例如：Level 1 - Initial：无序，自发生产模式。成熟度级别 1: 初始 Initial不可预测和被动。工作已经完成, 但经常被推迟和超出预算。 成熟度级别 2: 托管 Managed在项目级别上管理。项目是有计划的、执行的、测量的和控制的。 成熟度级别 3: 定义 Defined主动, 而不是反应。全组织标准为项目、计划和投资组合提供指导。 成熟度级别 4: 量化管理 Quantitatively Managed测量和控制。本组织以数据为导向, 实现量化的业绩改进目标, 这些目标是可预测的, 并与之保持一致, 以满足内部和外部利益攸关方的需求。 成熟度级别 5: 优化 Optimizing稳定灵活。本组织注重持续改进, 旨在对机遇和变化进行支点和反应。组织的稳定性为敏捷性和创新提供了一个平台。 6. 用自己语言简述 SWEBok 或 CMMI （约200字）SWEBok：是IEEE组织的一个项目，软件工程知识体系指南。在这本指南中，IEEE首次建立了软件工程领域知识体系的基线，他们的工作满足了部分想要促进该领域理论和实践的进展的想法。在这之前，社会上的相关工作受到了历史学科经验的指导，但没有受到一些遇到的问题或者解决方法的帮助。它是对过去几年不断发展和演变的知识体系的一个概略和指南，这个知识体系不是静态的，必须随着软件工程的成熟而发展和演变，是软件工程基础设施中一个有价值的元素。 CMMI：全称是Capability Maturity Model Integration，即能力成熟度模型集成，其目的是帮助软件企业对软件工程过程进行管理和改进，增强开发与改进能力，从而能按时地、不超预算地开发出高质量的软件。其所依据的想法是：只要集中精力持续努力去建立有效的软件工程过程的基础结构，不断进行管理的实践和过程的改进，就可以克服软件开发中的困难。CMMI为改进一个组织的各种过程提供了一个单一的集成化框架，新的集成模型框架消除了各个模型的不一致性，减少了模型间的重复，增加透明度和理解，建立了一个自动的、可扩展的框架。因而能够从总体上改进组织的质量和效率。CMMI主要关注点就是成本效益、明确重点、过程集中和灵活性四个方面。]]></content>
+      <categories>
+        <category>系统分析与设计</category>
+      </categories>
+      <tags>
+        <tag>系统分析与设计</tag>
+        <tag>作业</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[ImGui入门笔记]]></title>
+    <url>%2F2019%2F03%2F10%2FImGui%E5%85%A5%E9%97%A8%E7%AC%94%E8%AE%B0%2F</url>
+    <content type="text"><![CDATA[这个玩意资料有点少，所以记录一下怎么开始上路，怎么爬一些坑，供自己和别人参考…… 怎么学这东西这可能是最大的问题了。 首先肯定要看它的官网，https://github.com/ocornut/imgui； 然后你会发现官网的这个RAEDME是个蛇皮没什么大用…… 然后我们发现目录下有个doc目录，进去发现也没什么用，真的是…… 有用的部分在example文件夹下， 比如这个示例！这就是我们学习的最重要的资源了！！！ 安装 首先git clone这个仓库 1git clone https://github.com/ocornut/imgui 然后把目录下的所有.h和.cpp文件都复制到自己的项目里 就这些东西，全部复制进去就对了； 还没完，打开examples文件夹，进去可以看到有好多imgui_impl_***.*，挑选自己需要的那些都复制到自己的项目里；比如我的目录下 错了可能是复制多了几项，来回删一删试试……还是比较迷的…… 然后就可以跑了，跑一下发现报错gl3w.h没有，当然了用的不是这个库当然就没有了……打开imgui_impl_opengl3.h，把这里改成你所使用的库 应该是都在这几个里边了，我使用的是glad，所以使用了glad的宏； 跑跑第一个程序不出意外的话应该是可以跑了，我们可以直接把仓库的examples文件夹里，合适自己的用的那个复制过来试试，比如我用的是glfw+openGL3，我复制了这里的代码（路径是/examples/example_glfw_opengl3/main.cpp），这就可以点点画画了。]]></content>
+      <categories>
+        <category>ImGui</category>
+      </categories>
+      <tags>
+        <tag>ImGui</tag>
+        <tag>入门笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[OpenGL入门笔记]]></title>
+    <url>%2F2019%2F03%2F09%2FOpenGL%E5%85%A5%E9%97%A8%E7%AC%94%E8%AE%B0%2F</url>
+    <content type="text"><![CDATA[学习OpenGL还是挺难理解的，入门路上遇到了一些问题，在这里埋埋坑，希望可以帮助一些后来者 主要的学习来源是learnopengl的中文教程官网； 基本不会写到具体的过程，具体的过程在教程官网上已经非常详细了，所以这里基本上会写成类似于Q&amp;A，或者记录一些不理解的地方的形式…… 链接顶点属性EBO/IBO，索引这里讲的不错，https://blog.csdn.net/fenghen777/article/details/46981781 我们还是按照官网的教程来讲，官网给了这样一个例子，要画一个4边形； 12345678910float vertices[] = &#123; // 第一个三角形 0.5f, 0.5f, 0.0f, // 右上角 0.5f, -0.5f, 0.0f, // 右下角 -0.5f, 0.5f, 0.0f, // 左上角 // 第二个三角形 0.5f, -0.5f, 0.0f, // 右下角 -0.5f, -0.5f, 0.0f, // 左下角 -0.5f, 0.5f, 0.0f // 左上角&#125;; 为什么是6个点呢，因为OpenGL是按照三角形来渲染的，所以一个四边形就要分为两个三角形来绘制。 这样就造成了一个问题，有两个点是重复的，我们当然不想重复，不优雅啊！（当然最重要的问题是会造成多余的存储开销，多存了50%的点，如果三角形更多的话，这个开销还是很可观的）。 所以我们考虑一个新的方式，就是只输入4个顶点，然后我们指定绘制的顺序，就是这样： 1234567891011float vertices[] = &#123; 0.5f, 0.5f, 0.0f, // 右上角 0.5f, -0.5f, 0.0f, // 右下角 -0.5f, -0.5f, 0.0f, // 左下角 -0.5f, 0.5f, 0.0f // 左上角&#125;;unsigned int indices[] = &#123; // 注意索引从0开始! 0, 1, 3, // 第一个三角形 1, 2, 3 // 第二个三角形&#125;; 不知道你们怎么样，我第一次看是有点懵，仔细看了一下大概是这样的： 明白了吧，这个顶点的顺序就是顶点数组里的顺序。]]></content>
+      <categories>
+        <category>OpenGL</category>
+      </categories>
+      <tags>
+        <tag>OpenGL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Leetcode 264. Ugly Number II]]></title>
+    <url>%2F2019%2F03%2F07%2FLeetcode%20264.%20Ugly%20Number%20II%2F</url>
+    <content type="text"><![CDATA[Write a program to find the n-th ugly number. Ugly numbers are positive numbers whose prime factors only include 2, 3, 5. Example: 123Input: n = 10Output: 12Explanation: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12 is the sequence of the first 10 ugly numbers. Note: 1 is typically treated as an ugly number. n does not exceed 1690. Solution123456789101112131415class Solution &#123;public: int nthUglyNumber(int n) &#123; int i2 = 0, i3 = 0, i5 = 0; vector&lt;int&gt; dp &#123;1&#125;; for (int i = 0; i &lt; n; i++) &#123; int m = min( min(dp[i2]*2, dp[i3]*3), dp[i5]*5 ); dp.push_back(m); if (m == dp[i2]*2) i2++; if (m == dp[i3]*3) i3++; if (m == dp[i5]*5) i5++; &#125; return dp[n-1]; &#125;&#125;; 题解应该大家看着还是挺迷茫的，我们从题目开始思考，要找的是质因数只有2、3、5的数，那么我们可以产生两种思路，一种是验证的思路，对于每个数进行验证，判断他是否有2、3、5之外的质因子；或者是采用构造的思路，从某个数开始构造满足这个条件的数字。 明显第一种思路耗时很久，毕竟现在还是没有很好地判断因子分解的算法。从另一种思路出发，我们可以这样考虑：所有以2、3、5为因子的数相乘并不会产生其他的素数作为因子，我们可以简单地推导一下 很明显素数 $p$ 和 $q$ 相乘时，$pq$不存在其他的素数作为它的因子； $ p^i q^j $明显也没有其他素数作为因子 因此这个算法应该是成立的！ 因此，又为了排序的目的，我们逐个取最小值产生ugly number的数组。 如下： 1234567t2 = 0, t3 = 0, t5 = 0 uglg numbers [0] = 1for i from 1 to n uglg numbers [i] = min( uglg numbers [t2], uglg numbers [t3], uglg numbers [t5])return uglg numbers [n-1]]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>Algorithm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Leetcode 152. Maximum Product Subarray]]></title>
+    <url>%2F2019%2F03%2F07%2FLeetcode%20152.%20Maximum%20Product%20Subarray%2F</url>
+    <content type="text"><![CDATA[题目Given an integer array nums, find the contiguous subarray within an array (containing at least one number) which has the largest product. Example 1: 123Input: [2,3,-2,4]Output: 6Explanation: [2,3] has the largest product 6. Example 2: 123Input: [-2,0,-1]Output: 0Explanation: The result cannot be 2, because [-2,-1] is not a subarray. 题解这道题的目标是找到最大乘积的子串，还是比较复杂的，看题目就感觉是一道动态规划，我们首先肯定想到的是这样的递推公式： maxProduct[i] = max\{ maxProduct[i-1] * nums[i] , nums[i] \}其中，maxProduct[i]表示以第i位结尾的所有子串的最大乘积，所以要么选择nums[i]乘进去得到更大的值，要么不选择它，而是从他开始重新计算一个子串。 这个解法会遇到一个问题，比如[1, 2, -3, -5]，在面对两个负数的时候，我们的解法遇到-3时就会把它去掉而在-3的地方重新计算。即，maxProduct[i] = nums[i] = 3 ，但是，如果我们保留maxProduct[2] = maxProduct[i-1]*nums[i] = -6，那么我们在计算到-5时就可以得到更大的值30。 考虑这样的情况，我们要改造我们的算法，我们在保留最大的乘积的同时，保留一个最小的负值，期望这个负值可以让最终得到另一个负值时可以得到更大的计算结果。即： 当nums[i]为正值时： postiveMax[i] = max \{ nums[i] , postiveMax[i-1]*nums[i] \} \\ negtiveMin[i] = min \{ nums[i] , negtiveMin[i-1]*nums[i] \}很简单，最小的负值就是当前的最小负值乘上nums[i]或者本身（重新开始），最大的正值也就是当前的最大正值乘上nums[i]或者本身（重新开始）。 当nums[i]为负值时： postiveMax[i] = max\{ nums[i] , negtiveMin[i-1]*nums[i] \} \\ negtiveMin[i] = min\{ nums[i] , postiveMax[i-1]*nums[i] \};此时，最大正值可以通过最大的负值乘以当前的负nums[i]得来，也就解决了上面的问题。 下面我们进行实现： Solution 112345678910111213141516171819class Solution &#123;public: int maxProduct(vector&lt;int&gt;&amp; nums) &#123; int re = nums[0]; vector&lt;int&gt; postiveMax(nums); vector&lt;int&gt; negtiveMin(nums); for (int i = 1; i &lt; nums.size(); i++) &#123; if ( nums[i] &lt; 0 ) &#123; postiveMax[i] = max( nums[i] , negtiveMin[i-1]*nums[i] ); negtiveMin[i] = min( nums[i] , postiveMax[i-1]*nums[i] ); &#125; else &#123; postiveMax[i] = max( nums[i] , postiveMax[i-1]*nums[i] ); negtiveMin[i] = min( nums[i] , negtiveMin[i-1]*nums[i] ); &#125; re = max(re, postiveMax[i]); &#125; return re; &#125; &#125;; 还可以进行一些小小的优化使得代码量更加减少： 123456789101112131415class Solution &#123;public: int maxProduct(vector&lt;int&gt;&amp; nums) &#123; int re = nums[0]; vector&lt;int&gt; postiveMax(nums), negtiveMin(nums); for (int i = 1; i &lt; nums.size(); i++) &#123; postiveMax[i] = max( postiveMax[i-1]*nums[i] , max( nums[i] , negtiveMin[i-1]*nums[i] ) ); negtiveMin[i] = min( negtiveMin[i-1]*nums[i] , min( nums[i] , postiveMax[i-1]*nums[i] ) ); re = max(re, postiveMax[i]); &#125; return re; &#125; &#125;; 把判断nums[i]正负性的一步去掉了，因为我们其实无需关心到底是取了哪一个，我们只要它拿到最小和最大即可了。 分析我们分析这里的复杂度，发现空间复杂度是O(n)，时间复杂度也是O(n)。 这个解法还是可以更加优化一下的，空间复杂度可以降为O(1)，即每次只保留前一次(max[i-1])的结果就好了， 不需要知道前(max[i-2, i-3, ...])的内容。]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>Algorithm</tag>
+        <tag>Array</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Leetcode 97. Interleaving String]]></title>
+    <url>%2F2019%2F03%2F07%2FLeetcode%2097.%20Interleaving%20String%2F</url>
+    <content type="text"><![CDATA[Given s1, s2, s3, find whether s3 is formed by the interleaving of s1 and s2. Example 1: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbcbcac&quot;Output: true Example 2: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbbaccc&quot;Output: false 题解使用动态规划求解。 首先我们分解子问题。如果s3是s1和s2的交错字符串的话，那么一定有以下的一种情况 s3的最后一位和s2的最后一位相同，此时s3前边的子串(除去最后一位)一定是s2的前边的子串与s1的交错字符串。 s3的最后一位和s1的最后一位相同，此时s3前边的子串(除去最后一位)一定是s1的前边的子串与s2的交错字符串。 这个很容易想到，因为构造出交错的字符串的时候肯定是从s1选1个char，又从s2选1个char，所以如果当前是交错的串的话，去掉最后一位相同的位之后，前边的串肯定也是根据这个规则构造来的，所以也是交错的字符串。 因此我们可以写出迭代方程： length·of·s3 = l \\ length·of·s2 = n \\ length·of·s1 = m \\ isInterleave(s3[0...l]) = \\ (s3[l] == s2[n] ^ isInterleave(s1[0...m], s2[0...n-1], s3[0...l-1])) \\ or (s3[l] == s1[m] ^ isInterleave(s1[0...m-1], s2[0...n], s3[0...l-1])) \\基于此方程我们写出如下的解： Solution12345678910111213141516171819202122232425class Solution &#123;public: bool isInterleave(string s1, string s2, string s3) &#123; int m = s1.length(), n = s2.length(), l = s3.length(); if (m + n != l) return false; vector&lt;vector&lt;bool&gt;&gt; dp(m+1, vector&lt;bool&gt;(n+1, false)); for (int i = 0; i &lt; m+1; i++) &#123; for (int j = 0; j &lt; n+1; j++) &#123; if (i == 0 &amp;&amp; j == 0) dp[0][0] = true; else if (i == 0) dp[i][j] = dp[i][j-1] &amp;&amp; s2[j-1] == s3[i+j-1]; // when i = 0, j = 1 // dp[0][1] = dp[0][0] and s2[1] == s3[1] else if (j == 0) dp[i][j] = dp[i-1][j] &amp;&amp; s1[i-1] == s3[i+j-1]; // when i = 1, j = 0 // dp[1][0] = dp[0][0] and s1[1] == s3[1] else dp[i][j] = (dp[i-1][j] &amp;&amp; s1[i-1]==s3[i+j-1]) || (dp[i][j-1] &amp;&amp; s2[j-1]==s3[i+j-1]); // when i = 1, j = 1 // dp[1][1] = // | dp[0][1] &amp;&amp; s1[1] == s3[2] // | dp[1][0] &amp;&amp; s2[1] == s3[1] &#125; &#125; return dp[m][n]; &#125;&#125;;]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>String</tag>
+        <tag>Algorithm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[LeetCode 87. Scramble String]]></title>
+    <url>%2F2019%2F03%2F07%2FLeetCode%2087.%20Scramble%20String%2F</url>
+    <content type="text"><![CDATA[题目Given a string s1, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively. Below is one possible representation of s1 = &quot;great&quot;: 1234567 great / \ gr eat / \ / \g r e at / \ a t To scramble the string, we may choose any non-leaf node and swap its two children. For example, if we choose the node &quot;gr&quot; and swap its two children, it produces a scrambled string &quot;rgeat&quot;. 1234567 rgeat / \ rg eat / \ / \r g e at / \ a t We say that &quot;rgeat&quot; is a scrambled string of &quot;great&quot;. Similarly, if we continue to swap the children of nodes &quot;eat&quot; and &quot;at&quot;, it produces a scrambled string &quot;rgtae&quot;. 1234567 rgtae / \ rg tae / \ / \r g ta e / \ t a We say that &quot;rgtae&quot; is a scrambled string of &quot;great&quot;. Given two strings s1 and s2 of the same length, determine if s2 is a scrambled string of s1. Example 1: 12Input: s1 = &quot;great&quot;, s2 = &quot;rgeat&quot;Output: true Example 2: 12Input: s1 = &quot;abcde&quot;, s2 = &quot;caebd&quot;Output: false Solution 283 / 283 test cases passed. Status: Accepted Runtime: 0 ms 123456789101112131415161718192021222324252627282930class Solution &#123;public: bool isScramble(string s1, string s2) &#123; if(s1==s2) return true; int len = s1.length(); int count[26] = &#123;0&#125;; for(int i=0; i&lt;len; i++) &#123; count[s1[i]-'a']++; count[s2[i]-'a']--; &#125; for(int i=0; i&lt;26; i++) &#123; if(count[i]!=0) return false; &#125; for(int i=1; i&lt;=len-1; i++) &#123; if( isScramble(s1.substr(0,i), s2.substr(0,i)) &amp;&amp; isScramble(s1.substr(i), s2.substr(i))) return true; if( isScramble(s1.substr(0,i), s2.substr(len-i)) &amp;&amp; isScramble(s1.substr(i), s2.substr(0,len-i))) return true; &#125; return false; &#125;&#125;; 题解可以分析一下，两个串是 isScramble 的话，那么其中一个串，是通过另一个串进行多次的交换得来的。交换可以交换两个相邻的字符，也可以交换相邻的子串。 类似的我们可以分析，如果两个串满足这个性质，那么我们可以把它们都分为两个长度相同的部分（前i位，记为s11, s21，和后n-i位，记为s12, s22）。 思路很简单，如果两个串是 isScramble 的话，那么肯定是上下相对应，或者交换后相对应（即满足isScramble的)。也就是说，我们可以通过分别验证这两个性质来确认其是否满足条件，只要有一个满足，那么它就是isScramble的。 在这样的思路上我们可以做一些优化，比如将每次递归的结果存起来，使得递归到已经算过的子串的时候可以直接获取答案而不是再次进行计算。 但是在实际使用中发现优化后的代码运行速度并不快，我推测这是因为当前递归程序的重复计算已经被消除了，相同的子串不会进行多次判断，因而完全无需进行记忆性的递归。 分析 时间复杂度： 这是一个递归算法，每次循环n次，最多递归n层，时间复杂度为O(n!)，这是最坏情况]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>String</tag>
+        <tag>Algorithm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Hello World]]></title>
+    <url>%2F2019%2F03%2F07%2Fhello-world%2F</url>
+    <content type="text"><![CDATA[Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new "My New Post" More info: Writing Run server1$ hexo server More info: Server Generate static files1$ hexo generate More info: Generating Deploy to remote sites1$ hexo deploy More info: Deployment Do not just seek happiness for yourself. Seek happiness for all. Through kindness. Through mercy. David LevithanWide Awake]]></content>
+  </entry>
+</search>
