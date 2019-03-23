@@ -98,30 +98,25 @@
 
 
 
-  <meta name="description" content="几种光栅化算法，主要是直线的Bresenham算法，还有多边形的扫描线算法，填充等">
-<meta name="keywords" content="Algorithm,CG">
+  <meta name="description" content="题目Given a string s1, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively. Below is one possible representation of s1 = &amp;quot;great&amp;quot;: 1234567    great">
+<meta name="keywords" content="LeetCode,String,Algorithm">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Rasterization-Bresenham, scan line method">
-<meta property="og:url" content="https://gongzq5.github.io/2019/03/20/Rasterization-Bresenham, scan line method/index.html">
+<meta property="og:title" content="LeetCode 87. Scramble String">
+<meta property="og:url" content="https://gongzq5.github.io/posts/LeetCode 87. Scramble String/index.html">
 <meta property="og:site_name" content="Gongzq&#39;s blog">
-<meta property="og:description" content="几种光栅化算法，主要是直线的Bresenham算法，还有多边形的扫描线算法，填充等">
+<meta property="og:description" content="题目Given a string s1, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively. Below is one possible representation of s1 = &amp;quot;great&amp;quot;: 1234567    great">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://gongzq5.github.io/2019/03/20/Rasterization-Bresenham,%20scan%20line%20method/1553049632903.png">
-<meta property="og:image" content="https://gongzq5.github.io/2019/03/20/Rasterization-Bresenham,%20scan%20line%20method/bresenhams_line_generation.jpg">
-<meta property="og:image" content="https://gongzq5.github.io/2019/03/20/Rasterization-Bresenham,%20scan%20line%20method/dupper_and_dlower.jpg">
-<meta property="og:image" content="https://gongzq5.github.io/2019/03/20/Rasterization-Bresenham,%20scan%20line%20method/1553051527691.png">
-<meta property="og:updated_time" content="2019-03-20T05:27:41.513Z">
+<meta property="og:updated_time" content="2019-03-10T12:54:02.401Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Rasterization-Bresenham, scan line method">
-<meta name="twitter:description" content="几种光栅化算法，主要是直线的Bresenham算法，还有多边形的扫描线算法，填充等">
-<meta name="twitter:image" content="https://gongzq5.github.io/2019/03/20/Rasterization-Bresenham,%20scan%20line%20method/1553049632903.png">
+<meta name="twitter:title" content="LeetCode 87. Scramble String">
+<meta name="twitter:description" content="题目Given a string s1, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively. Below is one possible representation of s1 = &amp;quot;great&amp;quot;: 1234567    great">
 
 
 
 
 
 
-  <link rel="canonical" href="https://gongzq5.github.io/2019/03/20/Rasterization-Bresenham, scan line method/">
+  <link rel="canonical" href="https://gongzq5.github.io/posts/LeetCode 87. Scramble String/">
 
 
 
@@ -131,7 +126,7 @@
   };
 </script>
 
-  <title>Rasterization-Bresenham, scan line method | Gongzq's blog</title>
+  <title>LeetCode 87. Scramble String | Gongzq's blog</title>
   
 
 
@@ -406,7 +401,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://gongzq5.github.io/2019/03/20/Rasterization-Bresenham, scan line method/">
+    <link itemprop="mainEntityOfPage" href="https://gongzq5.github.io/posts/LeetCode 87. Scramble String/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="GongZequn">
@@ -423,7 +418,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Rasterization-Bresenham, scan line method
+          <h1 class="post-title" itemprop="name headline">LeetCode 87. Scramble String
 
               
             
@@ -449,12 +444,24 @@
                 
               
 
-              <time title="创建时间：2019-03-20 10:08:16 / 修改时间：13:27:41" itemprop="dateCreated datePublished" datetime="2019-03-20T10:08:16+08:00">2019-03-20</time>
+              <time title="创建时间：2019-03-07 12:06:29" itemprop="dateCreated datePublished" datetime="2019-03-07T12:06:29+08:00">2019-03-07</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-10 20:54:02" itemprop="dateModified" datetime="2019-03-10T20:54:02+08:00">2019-03-10</time>
               
             
           </span>
@@ -471,7 +478,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/CG/" itemprop="url" rel="index"><span itemprop="name">CG</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a></span>
 
                 
                 
@@ -490,8 +497,8 @@
                 </span>
             
                 <span class="post-meta-item-text">评论数：</span>
-                <a href="/2019/03/20/Rasterization-Bresenham, scan line method/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/03/20/Rasterization-Bresenham, scan line method/" itemprop="commentCount"></span>
+                <a href="/posts/LeetCode 87. Scramble String/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/posts/LeetCode 87. Scramble String/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -499,7 +506,7 @@
 
           
           
-            <span id="/2019/03/20/Rasterization-Bresenham, scan line method/" class="leancloud_visitors" data-flag-title="Rasterization-Bresenham, scan line method">
+            <span id="/posts/LeetCode 87. Scramble String/" class="leancloud_visitors" data-flag-title="LeetCode 87. Scramble String">
               <span class="post-meta-divider">|</span>
               <span class="post-meta-item-icon">
                 <i class="fa fa-eye"></i>
@@ -530,60 +537,35 @@
       
 
       
-        <p>几种光栅化算法，主要是直线的Bresenham算法，还有多边形的扫描线算法，填充等</p>
-<a id="more"></a>
-<h2 id="DDA"><a href="#DDA" class="headerlink" title="DDA"></a>DDA</h2><p>想了想还是先提一句DDA吧，这个也是经典了</p>
-<p>DDA就是简单的数值微分然后拟合的算法，它的原型大致过程如下：</p>
-<ol>
-<li>给两个点 $(x_1, y_1)，(x_2, y_2)$</li>
-<li>可以得到一个直线的表达式 $y=mx+b$</li>
-<li>每次推进一个$x$，即每次 $x=x+1$，然后计算 $y=mx+b$ 的值，每次要进行取整；</li>
-</ol>
-<p>如果 $m&gt;1$，那么可以选择每次将 $y$ 推进1格。</p>
-<p><img src="/2019/03/20/Rasterization-Bresenham, scan line method/1553049632903.png" width="70%/"></p>
-<p>通常来说，DDA对上述过程做了一定的优化，每次不需要都计算 $y=mx+b$ 了，而是选择如下的公式计算：</p>
-<script type="math/tex; mode=display">
-x_{k+1}=x_k+1；\\
-y_{k+1}=y_k+m；</script><p>到了 $m&gt;1$ 时就换成 $x_{k+1}=x_k+\frac{1}{m}$ 就好了，计算出结果以后取整作为像素点的坐标值。</p>
-<p>看起来好了很多，但是还是要涉及到浮点数的运算，还有不少的取整操作，对于计算机来说实在是有点困难（因为会算的很多，浮点总是要慢一些的，还会涉及到一定的舍入误差累计）。</p>
-<h2 id="Bresenham算法"><a href="#Bresenham算法" class="headerlink" title="Bresenham算法"></a>Bresenham算法</h2><p>感谢Bresenham老爷子提出的这个Bresenham算法，现在这基本上是所有直线算法的标准了，一般都会直接集成到硬件里。</p>
-<p><img src="/2019/03/20/Rasterization-Bresenham, scan line method/bresenhams_line_generation.jpg" alt="Bresenhamâs Line Generation"></p>
-<p>可以看出来，每次选下一个点都是在 $(x_k+1, y_k+1)$ 和 $(x_k + 1, y_k)$ 之间选取，到底选哪个要看直线到底在这个x坐标下，离哪个更近一些。</p>
-<p><img src="/2019/03/20/Rasterization-Bresenham, scan line method/dupper_and_dlower.jpg" alt="dupper and dlower"></p>
-<p>我们把上下的距离分别标注为 $ d<em>{upper} $ 和 $d</em>{lower}$ ，当下边比较大的时候，就要选取上边的点，所以我们让他们相减，代入直线公式可以得到</p>
-<script type="math/tex; mode=display">
-d_{lower} - d_{upper} = 2m(x_i + 1) - 2\overline{y_i} + 2B - 1</script><p>我们已经知道了 $\Delta x = x<em>{end} - x</em>{start} $ 是一个正值，所以我们可以把这个乘到上式，不会影响正负。</p>
-<script type="math/tex; mode=display">
-p_i = 2\Delta y \cdot x_i - 2\Delta x\cdot \overline{y_i} + c</script><blockquote>
-<p>这里 $\Delta x= x<em>{end} - x</em>{start}， \Delta y = y<em>{end} - y</em>{start}，m=\Delta y/ \Delta x$</p>
-<p>​        $c=(2B-1)\Delta x + 2 \Delta y$；</p>
+        <h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><p>Given a string <em>s1</em>, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively.</p>
+<p>Below is one possible representation of <em>s1</em> = <code>&quot;great&quot;</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">    great</span><br><span class="line">   /    \</span><br><span class="line">  gr    eat</span><br><span class="line"> / \    /  \</span><br><span class="line">g   r  e   at</span><br><span class="line">           / \</span><br><span class="line">          a   t</span><br></pre></td></tr></table></figure>
+<p>To scramble the string, we may choose any non-leaf node and swap its two children.</p>
+<p>For example, if we choose the node <code>&quot;gr&quot;</code> and swap its two children, it produces a scrambled string <code>&quot;rgeat&quot;</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">    rgeat</span><br><span class="line">   /    \</span><br><span class="line">  rg    eat</span><br><span class="line"> / \    /  \</span><br><span class="line">r   g  e   at</span><br><span class="line">           / \</span><br><span class="line">          a   t</span><br></pre></td></tr></table></figure>
+<p>We say that <code>&quot;rgeat&quot;</code> is a scrambled string of <code>&quot;great&quot;</code>.</p>
+<p>Similarly, if we continue to swap the children of nodes <code>&quot;eat&quot;</code> and <code>&quot;at&quot;</code>, it produces a scrambled string <code>&quot;rgtae&quot;</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">    rgtae</span><br><span class="line">   /    \</span><br><span class="line">  rg    tae</span><br><span class="line"> / \    /  \</span><br><span class="line">r   g  ta  e</span><br><span class="line">       / \</span><br><span class="line">      t   a</span><br></pre></td></tr></table></figure>
+<p>We say that <code>&quot;rgtae&quot;</code> is a scrambled string of <code>&quot;great&quot;</code>.</p>
+<p>Given two strings <em>s1</em> and <em>s2</em> of the same length, determine if <em>s2</em> is a scrambled string of <em>s1</em>.</p>
+<p><strong>Example 1:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Input: s1 = &quot;great&quot;, s2 = &quot;rgeat&quot;</span><br><span class="line">Output: true</span><br></pre></td></tr></table></figure>
+<p><strong>Example 2:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Input: s1 = &quot;abcde&quot;, s2 = &quot;caebd&quot;</span><br><span class="line">Output: false</span><br></pre></td></tr></table></figure>
+<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><blockquote>
+<p><strong>283 / 283</strong> test cases passed.</p>
+<p>Status: <strong>Accepted</strong></p>
+<p>Runtime: <strong>0 ms</strong></p>
 </blockquote>
-<p>然后我们可以代入算出来</p>
-<script type="math/tex; mode=display">
-\begin{align}
-\mathrm { p } _ { 0 } &= 2 \Delta \mathrm { y } \bullet x _ { 0 } - 2 \mathrm { x } \bullet \overline { y } _ { 0 } + ( 2 B - 1 ) \Delta x + 2 \Delta y \\
-&= 2 \Delta y \bullet x _ { 0 } - 2 \left( \Delta y \bullet x _ { 0 } + B \bullet \Delta x \right) + ( 2 B - 1 ) \Delta x + 2 \Delta y \\
-&= 2 \Delta y - \Delta x
-\end{align}</script><p>第二步代入了直线方程</p>
-<blockquote>
-<ul>
-<li><p>要注意这个公式只有 $p_0​$ 可以这样推导出来，因为 $\overline {y_0} = mx_0 + B​$，而其他的 $y_i​$ 就不能这么简单的算出来了。</p>
-</li>
-<li><p>$\overline{y_i}$ 就是在 $i$ 这个点处，光栅化以后的纵坐标的值</p>
-</li>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">isScramble</span><span class="params">(<span class="built_in">string</span> s1, <span class="built_in">string</span> s2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(s1==s2)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">int</span> len = s1.length();</span><br><span class="line">        <span class="keyword">int</span> count[<span class="number">26</span>] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;len; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            count[s1[i]-<span class="string">'a'</span>]++;</span><br><span class="line">            count[s2[i]-<span class="string">'a'</span>]--;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">26</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(count[i]!=<span class="number">0</span>)</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=len<span class="number">-1</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>( isScramble(s1.substr(<span class="number">0</span>,i), s2.substr(<span class="number">0</span>,i)) &amp;&amp; isScramble(s1.substr(i), s2.substr(i)))</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">if</span>( isScramble(s1.substr(<span class="number">0</span>,i), s2.substr(len-i)) &amp;&amp; isScramble(s1.substr(i), s2.substr(<span class="number">0</span>,len-i)))</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h2><p>可以分析一下，两个串是 <code>isScramble</code> 的话，那么其中一个串，是通过另一个串进行多次的交换得来的。交换可以交换两个相邻的字符，也可以交换相邻的子串。</p>
+<p>类似的我们可以分析，如果两个串满足这个性质，那么我们可以把它们都分为两个长度相同的部分（前i位，记为s11, s21，和后n-i位，记为s12, s22）。</p>
+<p>思路很简单，如果两个串是 <code>isScramble</code> 的话，那么肯定是上下相对应，或者交换后相对应（即满足isScramble的)。也就是说，我们可以通过分别验证这两个性质来确认其是否满足条件，只要有一个满足，那么它就是isScramble的。</p>
+<p>在这样的思路上我们可以做一些优化，比如将每次递归的结果存起来，使得递归到已经算过的子串的时候可以直接获取答案而不是再次进行计算。</p>
+<p>但是在实际使用中发现优化后的代码运行速度并不快，我推测这是因为当前递归程序的重复计算已经被消除了，相同的子串不会进行多次判断，因而完全无需进行记忆性的递归。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><ul>
+<li><strong>时间复杂度：</strong> 这是一个递归算法，每次循环n次，最多递归n层，时间复杂度为O(n!)，这是最坏情况</li>
 </ul>
-</blockquote>
-<p>还可以进一步的化简</p>
-<script type="math/tex; mode=display">
-\begin{aligned} p_{i+1} - p_{i} & = \left( 2 \Delta y \bullet x _ { i + 1 } - 2 \Delta x \cdot \overline { y } _ { i + 1 } + c \right) - \left( 2 \Delta y \bullet x _ { i } - 2 \Delta x \bullet \overline { y } _ { i } + c \right) \\ & = 2 \Delta y - 2 \Delta x \left( \overline { y } _ { i + 1 } - \overline { y } _ { i } \right) \end{aligned}</script><ul>
-<li><p>这里如果 $p<em>i \leq 0$，那么 $\overline {y</em>{i+1}} - \overline{y<em>i} = 0$，那么 $p</em>{i+1} = p_{i} + 2 \Delta y$；</p>
-</li>
-<li><p>这里如果 $p<em>i  &gt; 0$，那么 $\overline {y</em>{i+1}} - \overline{y<em>i} = 1$，那么 $p</em>{i+1} = p_{i} + 2 \Delta y - 2 \Delta x$；</p>
-</li>
-</ul>
-<p>简直是神器啊，得到这个以后就可以开始计算了，全是整数，不浮点不取整不舍入，还是拟合效果最棒的，贴一张图看个例子：</p>
-<p><img src="/2019/03/20/Rasterization-Bresenham, scan line method/1553051527691.png" alt="1553051527691"></p>
-<h2 id="多边形的填充"><a href="#多边形的填充" class="headerlink" title="多边形的填充"></a>多边形的填充</h2><p>接下来是更复杂的部分了</p>
 
       
     </div>
@@ -636,9 +618,11 @@ p_i = 2\Delta y \cdot x_i - 2\Delta x\cdot \overline{y_i} + c</script><blockquot
       
         <div class="post-tags">
           
-            <a href="/tags/Algorithm/" rel="tag"># Algorithm</a>
+            <a href="/tags/LeetCode/" rel="tag"># LeetCode</a>
           
-            <a href="/tags/CG/" rel="tag"># CG</a>
+            <a href="/tags/String/" rel="tag"># String</a>
+          
+            <a href="/tags/Algorithm/" rel="tag"># Algorithm</a>
           
         </div>
       
@@ -651,8 +635,8 @@ p_i = 2\Delta y \cdot x_i - 2\Delta x\cdot \overline{y_i} + c</script><blockquot
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/03/12/系统分析与设计作业1/" rel="next" title="系统分析与设计作业1">
-                <i class="fa fa-chevron-left"></i> 系统分析与设计作业1
+              <a href="/posts/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
               </a>
             
           </div>
@@ -660,6 +644,10 @@ p_i = 2\Delta y \cdot x_i - 2\Delta x\cdot \overline{y_i} + c</script><blockquot
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/Leetcode 97. Interleaving String/" rel="prev" title="Leetcode 97. Interleaving String">
+                Leetcode 97. Interleaving String <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -860,7 +848,7 @@ p_i = 2\Delta y \cdot x_i - 2\Delta x\cdot \overline{y_i} + c</script><blockquot
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DDA"><span class="nav-number">1.</span> <span class="nav-text">DDA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bresenham算法"><span class="nav-number">2.</span> <span class="nav-text">Bresenham算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多边形的填充"><span class="nav-number">3.</span> <span class="nav-text">多边形的填充</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#题目"><span class="nav-number">1.</span> <span class="nav-text">题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Solution"><span class="nav-number">2.</span> <span class="nav-text">Solution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#题解"><span class="nav-number">3.</span> <span class="nav-text">题解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">4.</span> <span class="nav-text">分析</span></a></li></ol></div>
             
 
           </div>
@@ -1498,6 +1486,14 @@ p_i = 2\Delta y \cdot x_i - 2\Delta x\cdot \overline{y_i} + c</script><blockquot
       }
     });
   });
+  
+  MathJax.Hub.Register.StartupHook("End Jax",function () {
+    var BROWSER = MathJax.Hub.Browser;
+    var jax = "SVG";
+    if (BROWSER.isMSIE && BROWSER.hasMathPlayer) jax = "NativeMML";
+    return MathJax.Hub.setRenderer(jax);
+  });
+  
 </script>
 
 <script type="text/x-mathjax-config">
