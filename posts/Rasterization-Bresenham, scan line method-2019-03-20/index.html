@@ -106,6 +106,7 @@
 <meta property="og:site_name" content="Gongzq&#39;s blog">
 <meta property="og:description" content="光栅化算法，主要是：  DDA 画直线算法； Bresenham 快速画直线算法； Bresenham 画圆算法； Edge Equation 三角形填充算法；">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/CG-HW3.gif">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/1553049632903.png">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/bresenhams_line_generation.jpg">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/dupper_and_dlower.jpg">
@@ -119,11 +120,11 @@
 <meta property="og:image" content="https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/1553532588083.png">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/1553532970086.png">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/1553569726468.png">
-<meta property="og:updated_time" content="2019-03-26T04:54:57.637Z">
+<meta property="og:updated_time" content="2019-03-26T06:34:29.349Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Rasterization-Bresenham, scan line method">
 <meta name="twitter:description" content="光栅化算法，主要是：  DDA 画直线算法； Bresenham 快速画直线算法； Bresenham 画圆算法； Edge Equation 三角形填充算法；">
-<meta name="twitter:image" content="https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/1553049632903.png">
+<meta name="twitter:image" content="https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/CG-HW3.gif">
 
 
 
@@ -475,7 +476,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-03-26 12:54:57" itemprop="dateModified" datetime="2019-03-26T12:54:57+08:00">2019-03-26</time>
+                <time title="修改时间：2019-03-26 14:34:29" itemprop="dateModified" datetime="2019-03-26T14:34:29+08:00">2019-03-26</time>
               
             
           </span>
@@ -559,6 +560,8 @@
 <li><strong>Edge Equation</strong> 三角形填充算法；</li>
 </ul>
 <a id="more"></a>
+<h2 id="实现结果"><a href="#实现结果" class="headerlink" title="实现结果"></a>实现结果</h2><p>先看效果啦，分别是使用<strong>Bresenham</strong>算法画直线、圆、并使用<strong>Edge Equation</strong>算法填充三角形的效果</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/CG-HW3.gif" alt="CG-HW3"></p>
 <h2 id="DDA"><a href="#DDA" class="headerlink" title="DDA"></a>DDA</h2><p>想了想还是先提一句DDA吧，这个也是经典了</p>
 <p>DDA就是简单的数值微分然后拟合的算法，它的原型大致过程如下：</p>
 <ol>
@@ -932,7 +935,7 @@ p_i = 2\Delta y \cdot x_i - 2\Delta x\cdot \overline{y_i} + c</script><blockquot
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DDA"><span class="nav-number">1.</span> <span class="nav-text">DDA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bresenham算法"><span class="nav-number">2.</span> <span class="nav-text">Bresenham算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Bresenham-直线算法原理"><span class="nav-number">2.1.</span> <span class="nav-text">Bresenham 直线算法原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bresenham-直线算法实现"><span class="nav-number">2.2.</span> <span class="nav-text">Bresenham 直线算法实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码"><span class="nav-number">2.3.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bresenham-算法绘制三角形"><span class="nav-number">3.</span> <span class="nav-text">Bresenham 算法绘制三角形</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bresenham-算法画圆"><span class="nav-number">4.</span> <span class="nav-text">Bresenham 算法画圆</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#算法原理概述"><span class="nav-number">4.1.</span> <span class="nav-text">算法原理概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码实现"><span class="nav-number">4.2.</span> <span class="nav-text">代码实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验结果"><span class="nav-number">4.3.</span> <span class="nav-text">实验结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Edge-Equation-三角形填充算法"><span class="nav-number">5.</span> <span class="nav-text">Edge Equation 三角形填充算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Edge-Equation-算法原理概述"><span class="nav-number">5.1.</span> <span class="nav-text">Edge Equation 算法原理概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Edge-Equation算法实现"><span class="nav-number">5.2.</span> <span class="nav-text">Edge Equation算法实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验结果-1"><span class="nav-number">5.3.</span> <span class="nav-text">实验结果</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#实现结果"><span class="nav-number">1.</span> <span class="nav-text">实现结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDA"><span class="nav-number">2.</span> <span class="nav-text">DDA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bresenham算法"><span class="nav-number">3.</span> <span class="nav-text">Bresenham算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Bresenham-直线算法原理"><span class="nav-number">3.1.</span> <span class="nav-text">Bresenham 直线算法原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bresenham-直线算法实现"><span class="nav-number">3.2.</span> <span class="nav-text">Bresenham 直线算法实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码"><span class="nav-number">3.3.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bresenham-算法绘制三角形"><span class="nav-number">4.</span> <span class="nav-text">Bresenham 算法绘制三角形</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bresenham-算法画圆"><span class="nav-number">5.</span> <span class="nav-text">Bresenham 算法画圆</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#算法原理概述"><span class="nav-number">5.1.</span> <span class="nav-text">算法原理概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码实现"><span class="nav-number">5.2.</span> <span class="nav-text">代码实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验结果"><span class="nav-number">5.3.</span> <span class="nav-text">实验结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Edge-Equation-三角形填充算法"><span class="nav-number">6.</span> <span class="nav-text">Edge Equation 三角形填充算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Edge-Equation-算法原理概述"><span class="nav-number">6.1.</span> <span class="nav-text">Edge Equation 算法原理概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Edge-Equation算法实现"><span class="nav-number">6.2.</span> <span class="nav-text">Edge Equation算法实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验结果-1"><span class="nav-number">6.3.</span> <span class="nav-text">实验结果</span></a></li></ol></li></ol></div>
             
 
           </div>
