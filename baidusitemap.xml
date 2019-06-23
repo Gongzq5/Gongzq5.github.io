@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://gongzq5.github.io/posts/Use-sequelize-ORM-in-Nodejs-2019-06-23/</loc>
+    <lastmod>2019-06-23</lastmod>
+  </url>  <url>
     <loc>https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/</loc>
     <lastmod>2019-03-26</lastmod>
   </url>  <url>

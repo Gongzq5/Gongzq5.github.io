@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://gongzq5.github.io/posts/Use-sequelize-ORM-in-Nodejs-2019-06-23/</loc>
+    
+    <lastmod>2019-06-23T08:44:41.498Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://gongzq5.github.io/homework/index.html</loc>
+    
+    <lastmod>2019-03-27T14:04:30.370Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://gongzq5.github.io/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/</loc>
     
     <lastmod>2019-03-26T06:34:29.349Z</lastmod>
@@ -16,13 +30,6 @@
   </url>
   
   <url>
-    <loc>https://gongzq5.github.io/homework/index.html</loc>
-    
-    <lastmod>2019-03-15T07:46:22.989Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://gongzq5.github.io/posts/hello-world-2019-03-07/</loc>
     
     <lastmod>2019-03-15T07:00:50.096Z</lastmod>
@@ -30,7 +37,7 @@
   </url>
   
   <url>
-    <loc>https://gongzq5.github.io/homework/hello.html</loc>
+    <loc>https://gongzq5.github.io/homework/hello/index.html</loc>
     
     <lastmod>2019-03-13T03:26:24.128Z</lastmod>
     

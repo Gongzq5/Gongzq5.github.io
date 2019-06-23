@@ -106,12 +106,12 @@
 <meta property="og:site_name" content="Gongzq&#39;s blog">
 <meta property="og:description" content="学习OpenGL还是挺难理解的，入门路上遇到了一些问题，在这里埋埋坑，希望可以帮助一些后来者 主要的学习来源是learnopengl的中文教程官网； 基本不会写到具体的过程，具体的过程在教程官网上已经非常详细了，所以这里基本上会写成类似于Q&amp;amp;A，或者记录一些不理解的地方的形式……">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://gongzq5.github.io/posts/OpenGL入门笔记-2019-03-09/1552133652192.png">
+<meta property="og:image" content="https://gongzq5.github.io/posts/OpenGL入门笔记-2019-03-09/OpenGL入门笔记/1552133652192.png">
 <meta property="og:updated_time" content="2019-03-10T16:30:22.747Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenGL入门笔记">
 <meta name="twitter:description" content="学习OpenGL还是挺难理解的，入门路上遇到了一些问题，在这里埋埋坑，希望可以帮助一些后来者 主要的学习来源是learnopengl的中文教程官网； 基本不会写到具体的过程，具体的过程在教程官网上已经非常详细了，所以这里基本上会写成类似于Q&amp;amp;A，或者记录一些不理解的地方的形式……">
-<meta name="twitter:image" content="https://gongzq5.github.io/posts/OpenGL入门笔记-2019-03-09/1552133652192.png">
+<meta name="twitter:image" content="https://gongzq5.github.io/posts/OpenGL入门笔记-2019-03-09/OpenGL入门笔记/1552133652192.png">
 
 
 
@@ -551,7 +551,7 @@
 <p>所以我们考虑一个新的方式，就是只输入4个顶点，然后我们指定绘制的顺序，就是这样：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> vertices[] = &#123;</span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>,   <span class="comment">// 右上角</span></span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>,  <span class="comment">// 右下角</span></span><br><span class="line">    <span class="number">-0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>, <span class="comment">// 左下角</span></span><br><span class="line">    <span class="number">-0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>   <span class="comment">// 左上角</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">int</span> indices[] = &#123; <span class="comment">// 注意索引从0开始! </span></span><br><span class="line">    <span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="comment">// 第一个三角形</span></span><br><span class="line">    <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>  <span class="comment">// 第二个三角形</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>不知道你们怎么样，我第一次看是有点懵，仔细看了一下大概是这样的：</p>
-<p><img src="/posts/OpenGL入门笔记-2019-03-09/1552133652192.png" alt="没错！就是这个顺序"></p>
+<p><img src="/posts/OpenGL入门笔记-2019-03-09/OpenGL入门笔记/1552133652192.png" alt="没错！就是这个顺序"></p>
 <p>明白了吧，这个顶点的顺序就是顶点数组里的顺序。</p>
 
       
@@ -705,7 +705,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-count">10</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -732,7 +732,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -769,7 +771,15 @@
                     
                       
                     
-                    <span class="site-state-item-count">10</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
