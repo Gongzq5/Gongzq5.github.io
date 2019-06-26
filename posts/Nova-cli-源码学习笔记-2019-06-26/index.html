@@ -108,7 +108,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473441859.png">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473406323.png">
-<meta property="og:updated_time" content="2019-06-25T17:37:48.313Z">
+<meta property="og:updated_time" content="2019-06-26T10:28:15.536Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Nova cli 源码学习笔记">
 <meta name="twitter:description" content="最终目标： 为Nova开发一个小组件！ 记录自己摸索的过程啦，持续更新直到完成">
@@ -447,7 +447,7 @@
                 
               
 
-              <time title="创建时间：2019-06-26 01:20:22 / 修改时间：01:37:48" itemprop="dateCreated datePublished" datetime="2019-06-26T01:20:22+08:00">2019-06-26</time>
+              <time title="创建时间：2019-06-26 01:20:22 / 修改时间：18:28:15" itemprop="dateCreated datePublished" datetime="2019-06-26T01:20:22+08:00">2019-06-26</time>
             
 
             
@@ -576,7 +576,15 @@
 <p>然后再<code>shell.py</code>里简单的加了输出，没有问题；再然后在<code>Client</code>函数里加Log，发现没有输出，找了半天原因，发现是导入模块时，直接导入了已安装的包的模块，而不是当前目录下的模块，强行改造源代码，加入了输出的部分，一切正常了。</p>
 <p><img src="/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473406323.png" alt="1561473406323"></p>
 <p>现在回头，从之前我们写的<code>flavor-list</code>这个命令开始进入程序分析</p>
-<h2 id="TODO-…"><a href="#TODO-…" class="headerlink" title="TODO …"></a>TODO …</h2><p>进度比较慢啊，感觉学了不少Python……真滴是……</p>
+<p>我们全项目匹配<code>flavor list</code>类似的关键字，找到了一个函数，<code>do_flavor_list</code>，位于<code>novaclient-&gt;v2-&gt;shell.py</code>，尝试着加一下log，输出了，没有问题，我们跟着这个函数的调用继续研究。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">do_flavor_list</span><span class="params">(cs, args)</span>:</span></span><br><span class="line">    <span class="string">"""Print a list of available 'flavors' (sizes of servers)."""</span></span><br><span class="line">    <span class="keyword">if</span> args.all:</span><br><span class="line">        flavors = cs.flavors.list(...)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        flavors = cs.flavors.list(...)</span><br><span class="line">    _print_flavor_list(cs, flavors, args.extra_specs)</span><br></pre></td></tr></table></figure>
+<p>可以看到，关键函数是 <code>cs.flavor.list()</code>，我们去找一下<code>flavor</code>的定义（在<code>v2-&gt;client.py</code>)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.flavors = flavors.FlavorManager(self)</span><br></pre></td></tr></table></figure>
+<p>继续去看<code>FlavorManager</code>，这里可以直接右键跳转了，发现<code>FlavorManager</code>的<code>list()</code>方法是处理了一些参数，然后转发给了<code>_list</code>这个方法。这个类里没有<code>_list</code>方法了，继续去基类找，一路找到<code>base.py</code>的<code>Manager</code>类，这个类有<code>_list</code>方法，获得重要参数的方法是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if body:</span><br><span class="line">    resp, body = self.api.client.post(url, body=body)</span><br><span class="line">else:</span><br><span class="line">    resp, body = self.api.client.get(url)</span><br></pre></td></tr></table></figure>
+<p>看一下<code>api</code>的定义，发现要一路回到<code>self.flavors = flavors.FlavorManager(self)</code>，这个<code>api</code>就是<code>client</code>本身，找到<code>client</code>实例的<code>client</code>属性，发现是个<code>httpclient</code>对象，用<code>_construct_http_client</code>方法构造，具体的操作流程就是发送了一个请求给<code>/flavors</code>，然后获得返回值，一路返回，也就是这个<code>api</code>的操作流程了。</p>
+<p>基本上大部分的API都可以通过这样的流程找到对应的位置，在此也就不再赘述啦……</p>
+<p>下面该去看<code>Nova</code>的源码了，看一下这个服务端到底是如何建立起来的</p>
 
       
     </div>
@@ -702,17 +710,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <div class="site-overview-wrap sidebar-panel">
+      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -862,23 +861,6 @@
         </div>
       </div>
 
-      
-      <!--noindex-->
-        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-            
-            
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TODO-…"><span class="nav-number">1.</span> <span class="nav-text">TODO …</span></a></li></ol></div>
-            
-
-          </div>
-        </div>
-      <!--/noindex-->
       
 
       
