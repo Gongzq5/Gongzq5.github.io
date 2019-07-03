@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://gongzq5.github.io/2019%20SWSAD%20Homework/index.html</loc>
+    
+    <lastmod>2019-07-03T13:11:52.111Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://gongzq5.github.io/posts/Nova-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2019-06-26/</loc>
+    
+    <lastmod>2019-06-26T10:47:24.779Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://gongzq5.github.io/posts/Nova-cli-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2019-06-26/</loc>
     
     <lastmod>2019-06-26T10:28:15.536Z</lastmod>
@@ -12,13 +26,6 @@
     <loc>https://gongzq5.github.io/posts/Use-sequelize-ORM-in-Nodejs-2019-06-23/</loc>
     
     <lastmod>2019-06-23T08:44:41.498Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://gongzq5.github.io/homework/index.html</loc>
-    
-    <lastmod>2019-03-27T14:04:30.370Z</lastmod>
     
   </url>
   
@@ -40,13 +47,6 @@
     <loc>https://gongzq5.github.io/posts/hello-world-2019-03-07/</loc>
     
     <lastmod>2019-03-15T07:00:50.096Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://gongzq5.github.io/homework/hello/index.html</loc>
-    
-    <lastmod>2019-03-13T03:26:24.128Z</lastmod>
     
   </url>
   
