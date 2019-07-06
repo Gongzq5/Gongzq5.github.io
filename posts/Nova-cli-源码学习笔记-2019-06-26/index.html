@@ -106,13 +106,13 @@
 <meta property="og:site_name" content="Gongzq&#39;s blog">
 <meta property="og:description" content="最终目标： 为Nova开发一个小组件！ 记录自己摸索的过程啦，持续更新直到完成">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://gongzq5.github.io/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473441859.png">
-<meta property="og:image" content="https://gongzq5.github.io/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473406323.png">
+<meta property="og:image" content="https://gongzq5.github.io/posts/Nova-cli-源码学习笔记-2019-06-26/1561473441859.png">
+<meta property="og:image" content="https://gongzq5.github.io/posts/Nova-cli-源码学习笔记-2019-06-26/1561473406323.png">
 <meta property="og:updated_time" content="2019-06-26T10:28:15.536Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Nova cli 源码学习笔记">
 <meta name="twitter:description" content="最终目标： 为Nova开发一个小组件！ 记录自己摸索的过程啦，持续更新直到完成">
-<meta name="twitter:image" content="https://gongzq5.github.io/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473441859.png">
+<meta name="twitter:image" content="https://gongzq5.github.io/posts/Nova-cli-源码学习笔记-2019-06-26/1561473441859.png">
 
 
 
@@ -553,7 +553,7 @@
 <p>找到自己的虚拟机，打开<code>admin-openrc</code>看一下，发现给了不少的参数</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">export OS_PROJECT_DOMAIN_NAME=Default</span><br><span class="line">export OS_USER_DOMAIN_NAME=Default</span><br><span class="line">export OS_PROJECT_NAME=admin</span><br><span class="line">export OS_USERNAME=admin</span><br><span class="line">export OS_PASSWORD=****</span><br><span class="line">export OS_AUTH_URL=http://controller:5000/v3</span><br><span class="line">export OS_IDENTITY_API_VERSION=3</span><br><span class="line">export OS_IMAGE_API_VERSION=2</span><br></pre></td></tr></table></figure>
 <p>激活环境变量，测试一下使用<code>nova flavor-list</code>，正常输出。</p>
-<p><img src="/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473441859.png" alt="1561473441859"></p>
+<p><img src="/posts/Nova-cli-源码学习笔记-2019-06-26/1561473441859.png" alt="1561473441859"></p>
 <p>把这些放到文档给的代码里试验一下，发现是不可以的，报错了，明显是我的权限验证有问题。</p>
 <p>从源代码开始分析一下，全文搜索<code>OS_PROJECT_</code>，5个文件中存在，除了<code>doc</code>和<code>test</code>中以外，就只剩下<code>shell.py</code>这个文件了，果然，这个文件从环境中读取了<code>OS_PROJECT_...</code>的变量。同时发现这个文件存在main函数，一定也是全程序的执行入口。从这个文件一路按图索骥，找到了熟悉的<code>client.Client()</code>调用，然后惊喜的发现，居然有两个<code>client</code>？？？还好注释写的明白，第一个声明只是为了确定version，第二个声明才是真正的声明。</p>
 <blockquote>
@@ -574,7 +574,7 @@
 <p>应该是自己给<code>args</code>加的属性，具体加了什么函数，还是不是很明确，应该是在这里执行的命令。</p>
 <p>猜测<code>nova</code>命令就是使用了<code>shell.py</code>的命令解析，所以试着直接运行 <code>shell.py</code>并加命令行参数，果然是可以的。</p>
 <p>然后再<code>shell.py</code>里简单的加了输出，没有问题；再然后在<code>Client</code>函数里加Log，发现没有输出，找了半天原因，发现是导入模块时，直接导入了已安装的包的模块，而不是当前目录下的模块，强行改造源代码，加入了输出的部分，一切正常了。</p>
-<p><img src="/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473406323.png" alt="1561473406323"></p>
+<p><img src="/posts/Nova-cli-源码学习笔记-2019-06-26/1561473406323.png" alt="1561473406323"></p>
 <p>现在回头，从之前我们写的<code>flavor-list</code>这个命令开始进入程序分析</p>
 <p>我们全项目匹配<code>flavor list</code>类似的关键字，找到了一个函数，<code>do_flavor_list</code>，位于<code>novaclient-&gt;v2-&gt;shell.py</code>，尝试着加一下log，输出了，没有问题，我们跟着这个函数的调用继续研究。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">do_flavor_list</span><span class="params">(cs, args)</span>:</span></span><br><span class="line">    <span class="string">"""Print a list of available 'flavors' (sizes of servers)."""</span></span><br><span class="line">    <span class="keyword">if</span> args.all:</span><br><span class="line">        flavors = cs.flavors.list(...)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        flavors = cs.flavors.list(...)</span><br><span class="line">    _print_flavor_list(cs, flavors, args.extra_specs)</span><br></pre></td></tr></table></figure>

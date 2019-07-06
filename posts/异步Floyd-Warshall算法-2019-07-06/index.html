@@ -106,13 +106,13 @@
 <meta property="og:site_name" content="Gongzq&#39;s blog">
 <meta property="og:description" content="同步算法同步的Floyd-Warshall算法还是很简单的，算法过程如下  也很好理解，就是对于每条路径 (s-&amp;gt;t)，寻找他们经过的最近的那个中间点（pivot），目标是找到一个s-&amp;gt;pivot-&amp;gt;t的路径比当前确定的s-&amp;gt;t的路径还要近。所以就不停的测试，从s到t的路径变成s-&amp;gt;1-&amp;gt;t，s-&amp;gt;2-&amp;gt;t……会不会近一点…… 更深入来说，其实是一">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/异步Floyd-Warshall算法/1562403204556.png">
-<meta property="og:image" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/异步Floyd-Warshall算法/1562417540795.png">
+<meta property="og:image" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/1562403204556.png">
+<meta property="og:image" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/1562417540795.png">
 <meta property="og:updated_time" content="2019-07-06T12:53:58.526Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="异步Floyd-Warshall算法">
 <meta name="twitter:description" content="同步算法同步的Floyd-Warshall算法还是很简单的，算法过程如下  也很好理解，就是对于每条路径 (s-&amp;gt;t)，寻找他们经过的最近的那个中间点（pivot），目标是找到一个s-&amp;gt;pivot-&amp;gt;t的路径比当前确定的s-&amp;gt;t的路径还要近。所以就不停的测试，从s到t的路径变成s-&amp;gt;1-&amp;gt;t，s-&amp;gt;2-&amp;gt;t……会不会近一点…… 更深入来说，其实是一">
-<meta name="twitter:image" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/异步Floyd-Warshall算法/1562403204556.png">
+<meta name="twitter:image" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/1562403204556.png">
 
 
 
@@ -530,13 +530,13 @@
       
         <a id="more"></a>
 <h2 id="同步算法"><a href="#同步算法" class="headerlink" title="同步算法"></a>同步算法</h2><p>同步的<strong>Floyd-Warshall</strong>算法还是很简单的，算法过程如下</p>
-<p><img src="/posts/异步Floyd-Warshall算法-2019-07-06/异步Floyd-Warshall算法/1562403204556.png" alt="1562403204556"></p>
+<p><img src="/posts/异步Floyd-Warshall算法-2019-07-06/1562403204556.png" alt="1562403204556"></p>
 <p>也很好理解，就是对于每条路径 (<code>s-&gt;t</code>)，寻找他们经过的最近的那个中间点（<code>pivot</code>），目标是找到一个<code>s-&gt;pivot-&gt;t</code>的路径比当前确定的<code>s-&gt;t</code>的路径还要近。所以就不停的测试，从<code>s</code>到<code>t</code>的路径变成<code>s-&gt;1-&gt;t</code>，<code>s-&gt;2-&gt;t</code>……会不会近一点……</p>
 <p>更深入来说，其实是一种动态规划的思想，先找到任意两个节点通过节点1的最短长度，然后再找通过节点2的最短长度=min{using 1, 2}</p>
 <p>可以去百度一下，同步算法的博客有很多，讲的比我详细的多，直接搜<code>floyd-warshall</code>就可以了</p>
 <h2 id="异步算法"><a href="#异步算法" class="headerlink" title="异步算法"></a>异步算法</h2><p>异步算法就比较奇怪了，首先我们使用同步算法的依据是<code>LENGTH</code>这个变量保存了所有的距离信息，也就是说，全局的距离信息都是已知的，然而到了异步版本，每个进程都只知道自己到各个节点的距离（标记为<code>LEN</code>，而且这个最近的一跳也要记下来，标记为<code>PARENT</code>），而不知道其他两个节点的距离，所以我们需要处理，让每个进程知道全部的消息。</p>
 <p>还是要按照同步算法的思想来处理，所以循环的最中心最重要的变量是<code>pivot</code>到各个节点的距离，所以我们可以将<code>pivot</code>节点的<code>LEN</code>信息对全网进行广播，所以其他节点就可以根据此个<code>pivot</code>的信息对自己的变量进行更新了。</p>
-<p><img src="/posts/异步Floyd-Warshall算法-2019-07-06/异步Floyd-Warshall算法/1562417540795.png" alt="1562417540795"></p>
+<p><img src="/posts/异步Floyd-Warshall算法-2019-07-06/1562417540795.png" alt="1562417540795"></p>
 <p>草草的总结了一下，大致是这个意思的</p>
 <ul>
 <li><p>依次用每个节点作为中心点pivot</p>
