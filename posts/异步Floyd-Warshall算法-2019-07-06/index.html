@@ -98,20 +98,20 @@
 
 
 
-  <meta name="description" content="同步算法同步的Floyd-Warshall算法还是很简单的，算法过程如下  也很好理解，就是对于每条路径 (s-&amp;gt;t)，寻找他们经过的最近的那个中间点（pivot），目标是找到一个s-&amp;gt;pivot-&amp;gt;t的路径比当前确定的s-&amp;gt;t的路径还要近。所以就不停的测试，从s到t的路径变成s-&amp;gt;1-&amp;gt;t，s-&amp;gt;2-&amp;gt;t……会不会近一点…… 更深入来说，其实是一">
-<meta name="keywords" content="分布式,算法">
+  <meta name="description" content="异步的Warshall算法找了半天没找到参考，自记一篇">
+<meta name="keywords" content="算法,分布式">
 <meta property="og:type" content="article">
 <meta property="og:title" content="异步Floyd-Warshall算法">
 <meta property="og:url" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/index.html">
 <meta property="og:site_name" content="Gongzq&#39;s blog">
-<meta property="og:description" content="同步算法同步的Floyd-Warshall算法还是很简单的，算法过程如下  也很好理解，就是对于每条路径 (s-&amp;gt;t)，寻找他们经过的最近的那个中间点（pivot），目标是找到一个s-&amp;gt;pivot-&amp;gt;t的路径比当前确定的s-&amp;gt;t的路径还要近。所以就不停的测试，从s到t的路径变成s-&amp;gt;1-&amp;gt;t，s-&amp;gt;2-&amp;gt;t……会不会近一点…… 更深入来说，其实是一">
+<meta property="og:description" content="异步的Warshall算法找了半天没找到参考，自记一篇">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/1562403204556.png">
 <meta property="og:image" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/1562417540795.png">
-<meta property="og:updated_time" content="2019-07-06T12:53:58.526Z">
+<meta property="og:updated_time" content="2019-07-07T06:50:37.454Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="异步Floyd-Warshall算法">
-<meta name="twitter:description" content="同步算法同步的Floyd-Warshall算法还是很简单的，算法过程如下  也很好理解，就是对于每条路径 (s-&amp;gt;t)，寻找他们经过的最近的那个中间点（pivot），目标是找到一个s-&amp;gt;pivot-&amp;gt;t的路径比当前确定的s-&amp;gt;t的路径还要近。所以就不停的测试，从s到t的路径变成s-&amp;gt;1-&amp;gt;t，s-&amp;gt;2-&amp;gt;t……会不会近一点…… 更深入来说，其实是一">
+<meta name="twitter:description" content="异步的Warshall算法找了半天没找到参考，自记一篇">
 <meta name="twitter:image" content="https://gongzq5.github.io/posts/异步Floyd-Warshall算法-2019-07-06/1562403204556.png">
 
 
@@ -447,12 +447,24 @@
                 
               
 
-              <time title="创建时间：2019-07-06 16:43:44 / 修改时间：20:53:58" itemprop="dateCreated datePublished" datetime="2019-07-06T16:43:44+08:00">2019-07-06</time>
+              <time title="创建时间：2019-07-06 16:43:44" itemprop="dateCreated datePublished" datetime="2019-07-06T16:43:44+08:00">2019-07-06</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-07 14:50:37" itemprop="dateModified" datetime="2019-07-07T14:50:37+08:00">2019-07-07</time>
               
             
           </span>
@@ -528,7 +540,8 @@
       
 
       
-        <a id="more"></a>
+        <p>异步的Warshall算法找了半天没找到参考，自记一篇</p>
+<a id="more"></a>
 <h2 id="同步算法"><a href="#同步算法" class="headerlink" title="同步算法"></a>同步算法</h2><p>同步的<strong>Floyd-Warshall</strong>算法还是很简单的，算法过程如下</p>
 <p><img src="/posts/异步Floyd-Warshall算法-2019-07-06/1562403204556.png" alt="1562403204556"></p>
 <p>也很好理解，就是对于每条路径 (<code>s-&gt;t</code>)，寻找他们经过的最近的那个中间点（<code>pivot</code>），目标是找到一个<code>s-&gt;pivot-&gt;t</code>的路径比当前确定的<code>s-&gt;t</code>的路径还要近。所以就不停的测试，从<code>s</code>到<code>t</code>的路径变成<code>s-&gt;1-&gt;t</code>，<code>s-&gt;2-&gt;t</code>……会不会近一点……</p>
@@ -635,9 +648,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/分布式/" rel="tag"># 分布式</a>
-          
             <a href="/tags/算法/" rel="tag"># 算法</a>
+          
+            <a href="/tags/分布式/" rel="tag"># 分布式</a>
           
         </div>
       
@@ -1500,6 +1513,61 @@
   
   
 
+  
+    
+      <script type="text/x-mathjax-config">
+  
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') { next = next.nextSibling }
+        if (next && next.nodeName.toLowerCase() === 'br') { next.parentNode.removeChild(next) }
+      }
+    });
+  });
+  
+  MathJax.Hub.Register.StartupHook("End Jax",function () {
+    var BROWSER = MathJax.Hub.Browser;
+    var jax = "SVG";
+    if (BROWSER.isMSIE && BROWSER.hasMathPlayer) jax = "NativeMML";
+    return MathJax.Hub.setRenderer(jax);
+  });
+  
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+<script src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<style>
+.MathJax_Display {
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+</style>
+
+    
   
 
 

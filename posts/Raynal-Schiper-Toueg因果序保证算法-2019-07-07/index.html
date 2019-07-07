@@ -99,7 +99,7 @@
 
 
   <meta name="description" content="又是一篇没人写的算法，这门课没得参考就很尴尬 是一种分布式环境下的因果序保证算法 Pre: 消息通道，因果序">
-<meta name="keywords" content="分布式,算法">
+<meta name="keywords" content="算法,分布式">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Raynal-Schiper-Toueg因果序保证算法">
 <meta property="og:url" content="https://gongzq5.github.io/posts/Raynal-Schiper-Toueg因果序保证算法-2019-07-07/index.html">
@@ -108,7 +108,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Raynal-Schiper-Toueg因果序保证算法-2019-07-07/1562480347865.png">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Raynal-Schiper-Toueg因果序保证算法-2019-07-07/1562481429579.png">
-<meta property="og:updated_time" content="2019-07-07T06:43:17.960Z">
+<meta property="og:updated_time" content="2019-07-07T06:50:58.866Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Raynal-Schiper-Toueg因果序保证算法">
 <meta name="twitter:description" content="又是一篇没人写的算法，这门课没得参考就很尴尬 是一种分布式环境下的因果序保证算法 Pre: 消息通道，因果序">
@@ -447,7 +447,7 @@
                 
               
 
-              <time title="创建时间：2019-07-07 11:49:30 / 修改时间：14:43:17" itemprop="dateCreated datePublished" datetime="2019-07-07T11:49:30+08:00">2019-07-07</time>
+              <time title="创建时间：2019-07-07 11:49:30 / 修改时间：14:50:58" itemprop="dateCreated datePublished" datetime="2019-07-07T11:49:30+08:00">2019-07-07</time>
             
 
             
@@ -626,9 +626,9 @@ DELIV[x] \geq ST[x, i]</script><p>满足时，确认已收到了所有依赖的�
       
         <div class="post-tags">
           
-            <a href="/tags/分布式/" rel="tag"># 分布式</a>
-          
             <a href="/tags/算法/" rel="tag"># 算法</a>
+          
+            <a href="/tags/分布式/" rel="tag"># 分布式</a>
           
         </div>
       
@@ -1487,6 +1487,61 @@ DELIV[x] \geq ST[x, i]</script><p>满足时，确认已收到了所有依赖的�
   
   
 
+  
+    
+      <script type="text/x-mathjax-config">
+  
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') { next = next.nextSibling }
+        if (next && next.nodeName.toLowerCase() === 'br') { next.parentNode.removeChild(next) }
+      }
+    });
+  });
+  
+  MathJax.Hub.Register.StartupHook("End Jax",function () {
+    var BROWSER = MathJax.Hub.Browser;
+    var jax = "SVG";
+    if (BROWSER.isMSIE && BROWSER.hasMathPlayer) jax = "NativeMML";
+    return MathJax.Hub.setRenderer(jax);
+  });
+  
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+<script src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<style>
+.MathJax_Display {
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+</style>
+
+    
   
 
 
