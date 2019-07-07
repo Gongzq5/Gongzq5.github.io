@@ -108,7 +108,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Raynal-Schiper-Toueg因果序保证算法-2019-07-07/1562480347865.png">
 <meta property="og:image" content="https://gongzq5.github.io/posts/Raynal-Schiper-Toueg因果序保证算法-2019-07-07/1562481429579.png">
-<meta property="og:updated_time" content="2019-07-07T06:50:58.866Z">
+<meta property="og:updated_time" content="2019-07-07T06:54:17.172Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Raynal-Schiper-Toueg因果序保证算法">
 <meta name="twitter:description" content="又是一篇没人写的算法，这门课没得参考就很尴尬 是一种分布式环境下的因果序保证算法 Pre: 消息通道，因果序">
@@ -447,7 +447,7 @@
                 
               
 
-              <time title="创建时间：2019-07-07 11:49:30 / 修改时间：14:50:58" itemprop="dateCreated datePublished" datetime="2019-07-07T11:49:30+08:00">2019-07-07</time>
+              <time title="创建时间：2019-07-07 11:49:30 / 修改时间：14:54:17" itemprop="dateCreated datePublished" datetime="2019-07-07T11:49:30+08:00">2019-07-07</time>
             
 
             
@@ -534,7 +534,7 @@
 <a id="more"></a>
 <h2 id="因果序是什么"><a href="#因果序是什么" class="headerlink" title="因果序是什么"></a>因果序是什么</h2><p>一个消息通道保证因果序，意味着当两个消息的发送有依赖关系时，接收也要有依赖的关系，即：逻辑先发的一定会在逻辑上先收到。</p>
 <p>数学一点，是这样的：</p>
-<p>对任意两个发向同一进程的消息$m<em>{ij}$和$m</em>{kj}$  ，假设$Send(m<em>{ij})→Send(m</em>{kj})$，则$Recv(m<em>{ij})→Recv(m</em>{kj})$</p>
+<p>对任意两个发向同一进程的消息 $m<em>{ij}$和 $m</em>{kj}$  ，假设 $Send(m<em>{ij})→Send(m</em>{kj})$，则 $Recv(m<em>{ij})→Recv(m</em>{kj})$</p>
 <p>也就是说，发送是有逻辑依赖的关系，在接收时也是按照逻辑依赖的顺序接收的。</p>
 <p>除了因果序，消息通道还有以下的顺序</p>
 <ul>
