@@ -1,0 +1,1289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Kolla-ansible安装Openstack(Ubuntu 18)全记录</title>
+    <url>/posts/Kolla-ansible%E5%AE%89%E8%A3%85Openstack-Ubuntu-18-%E5%85%A8%E8%AE%B0%E5%BD%95-2019-11-16/</url>
+    <content><![CDATA[<p>使用Kolla-ansible在Ubuntu18.04上安装Openstack</p>
+<p>当前只完成了all-in-one的部分，multinode遇到了坑，晚些再找找解决办法</p>
+<a id="more"></a>
+<p>[TOC]</p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><ol>
+<li><p>两台机器 Ubuntu 18.04 Server版<br> 2 network interfaces<br> 8GB main memory<br> 40GB disk space</p>
+</li>
+<li><p>安装pip</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">apt-get update</span><br><span class="line">apt-get install python-pip</span><br><span class="line">pip install -U pip</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="配置Ubuntu"><a href="#配置Ubuntu" class="headerlink" title="配置Ubuntu"></a>配置Ubuntu</h1><ol>
+<li><p>apt换源，这里换成了清华源（注意不同的Ubuntu这个url是不同的），而且如果安装的时候写明了源的话，进来应该就不用自己改了</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp /etc/apt/sources.list /etc/apt/sources.list.bkp</span><br><span class="line">vim /etc/apt/sources.list</span><br><span class="line">    </span><br><span class="line"># 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释</span><br><span class="line">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse</span><br><span class="line">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse</span><br><span class="line">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse</span><br><span class="line">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse</span><br><span class="line"></span><br><span class="line"># 预发布软件源，不建议启用</span><br><span class="line"># deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>pip源</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">~/.pip/pip.conf</span><br><span class="line">[global]</span><br><span class="line">index-url = https://pypi.tuna.tsinghua.edu.cn/simple</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>python-pip 问题</p>
+<p> 可能会遇到说<code>cannot import main</code>这样的错误，网上都让你直接修改pip的源码，但是我改了好几个都GG了，发现重装Pip比较简单</p>
+</li>
+</ol>
+<pre><code><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo python3 -m pip uninstall pip &amp;&amp; sudo apt install python3-pip --reinstall</span><br><span class="line">sudo python -m pip uninstall pip &amp;&amp; sudo apt install python-pip --reinstall</span><br></pre></td></tr></table></figure>
+
+按以上方式重装，注意python版本
+</code></pre><ol>
+<li><p>允许root用户登录</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo vi /etc/ssh/sshd_config</span><br><span class="line"></span><br><span class="line">修改</span><br><span class="line">PermitRootLogin yes</span><br><span class="line">#PermitEmptyPasswords yes 无密码登录</span><br><span class="line"></span><br><span class="line">重启SSH服务</span><br><span class="line">service sshd restart  # 或者 /etc/initd.d/sshd restart</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>安装一些基础依赖</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">apt-get install python-dev libffi-dev gcc libssl-dev python-selinux python-setuptools</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li>安装ansible <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">apt-get install ansible</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li>升级Ansible <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install -U ansible</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li><p>【可选】添加到 /etc/ansible/ansible.cfg:</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[defaults]</span><br><span class="line">host_key_checking=False</span><br><span class="line">pipelining=True</span><br><span class="line">forks=100</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>安装Docker和配置Docker hub的国内源</p>
+<p>安装：<a href="https://docs.docker.com/install/linux/docker-ce/ubuntu/" target="_blank" rel="noopener">https://docs.docker.com/install/linux/docker-ce/ubuntu/</a></p>
+<p>配置国内源推荐阿里云，点进去控制台找<code>容器</code>，里边有配置加速器的选项，就可以了，我用了中科大和daocloud的都不成，估计晚些会自己配一个docker registry，不然项目大规模部署的话，拉取确实太慢了</p>
+</li>
+</ol>
+<h1 id="网络配置"><a href="#网络配置" class="headerlink" title="网络配置"></a>网络配置</h1><ol>
+<li><p>虚拟机选择3个网卡</p>
+<ul>
+<li>一个是NAT，负责连外网；</li>
+<li>一个是主机模式，给主机上的虚拟网卡配置成了<code>10.0.0.X/24</code></li>
+<li>一个随便设置了，用来给neutron的那个配置用</li>
+</ul>
+</li>
+<li><p>Ubuntu 显示网卡</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ifconfig -a</span><br></pre></td></tr></table></figure>
+<p>不加-a的话，如果有未启用的网卡是不显示的，一般最好加上-a</p>
+</li>
+<li><p>配置netplan</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vim /etc/netplan/50-cloud-init.yaml</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">network:</span><br><span class="line">    ethernets:</span><br><span class="line">        ens33:</span><br><span class="line">            dhcp4: true</span><br><span class="line">        ens38:</span><br><span class="line">            addresses: [10.0.0.3/24]</span><br><span class="line">            routes:</span><br><span class="line">                - to: 10.0.0.0/24</span><br><span class="line">                  via: 10.0.0.1</span><br><span class="line">            dhcp4: no</span><br><span class="line">    version: 2</span><br></pre></td></tr></table></figure>
+<p>注意不要配置gateway4，而是使用routes进行路由，不然会导致路由的异常，可查看<code>route -n</code>查看路由表</p>
+<p>我现在的路由表是</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</span><br><span class="line">0.0.0.0         192.168.178.2   0.0.0.0         UG    100    0        0 ens33</span><br><span class="line">10.0.0.0        0.0.0.0         255.255.255.0   U     0      0        0 ens38</span><br><span class="line">10.0.0.0        10.0.0.1        255.255.255.0   UG    0      0        0 ens38</span><br><span class="line">172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0</span><br><span class="line">192.168.178.0   0.0.0.0         255.255.255.0   U     0      0        0 ens33</span><br><span class="line">192.168.178.2   0.0.0.0         255.255.255.255 UH    100    0        0 ens33</span><br></pre></td></tr></table></figure>
+<p>192.168.178.2是通外网的，设为默认路由</p>
+</li>
+<li><p>启用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">netplan apply</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用<code>ifconfig</code>测试正确性</p>
+</li>
+<li><p>编辑<code>/etc/hosts</code>文件，添加解析</p>
+</li>
+</ol>
+<h1 id="安装Kolla-ansible"><a href="#安装Kolla-ansible" class="headerlink" title="安装Kolla-ansible"></a>安装Kolla-ansible</h1><h2 id="【选】安装kolla-ansible的部署版"><a href="#【选】安装kolla-ansible的部署版" class="headerlink" title="【选】安装kolla-ansible的部署版"></a>【选】安装kolla-ansible的部署版</h2><ol>
+<li>安装kolla-ansible <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install kolla-ansible</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li><p>拷贝文件到工作目录 Copy globals.yml and passwords.yml to /etc/kolla directory</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp -r /usr/local/share/kolla-ansible/etc_examples/kolla /etc/</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>拷贝Inventory到当前目录</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp /usr/local/share/kolla-ansible/ansible/inventory/* .</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="【荐】安装kolla-ansible开发模式"><a href="#【荐】安装kolla-ansible开发模式" class="headerlink" title="【荐】安装kolla-ansible开发模式"></a>【荐】安装kolla-ansible开发模式</h2><ol>
+<li>clone 两个仓库 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https://github.com/openstack/kolla</span><br><span class="line">git clone https://github.com/openstack/kolla-ansible</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li>安装requirements.txt <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install -r kolla/requirements.txt</span><br><span class="line">pip install -r kolla-ansible/requirements.txt</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li>复制配置文件到 /etc/kolla <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mkdir -p /etc/kolla</span><br><span class="line">cp -r kolla-ansible/etc/kolla/* /etc/kolla</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li><p>Copy the inventory files to the current directory. </p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp kolla-ansible/ansible/inventory/* .</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>如果要使用Kolla-ansible命令的话，就要进<code>kolla-ansible/tools</code>目录下使用<code>kolla-ansible</code>文件执行</p>
+</li>
+</ol>
+<h1 id="杂项"><a href="#杂项" class="headerlink" title="杂项"></a>杂项</h1><ol>
+<li><p>新建用户</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">useradd csdn</span><br><span class="line">usermod -s /bin/bash csdn</span><br><span class="line">usermod -d /home/csdn csdn</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>添加到sudoers</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">chmod u+w /etc/sudoers</span><br><span class="line">vim /etc/sudoers</span><br><span class="line"></span><br><span class="line">csdn ALL=(ALL) ALL</span><br><span class="line"></span><br><span class="line">chmod u-w /etc/sudoers</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>用户可能对自己的目录没有权限</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">chown -R csdn /home/csdn</span><br><span class="line">chgrp -R csdn /home/csdn</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>Leetcode 206. Reverse Linked List</title>
+    <url>/posts/Leetcode-206-Reverse-Linked-List-2019-10-09/</url>
+    <content><![CDATA[<h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>Reverse a singly linked list.</p>
+<p><strong>Example:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input: 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL</span><br><span class="line">Output: 5-&gt;4-&gt;3-&gt;2-&gt;1-&gt;NULL</span><br></pre></td></tr></table></figure>
+<p><strong>Follow up:</strong></p>
+<p>A linked list can be reversed either iteratively or recursively. Could you implement both?</p>
+<p>简单来说，将一个链表反转过来（还推荐使用迭代和递归两种方法来实现）</p>
+<h1 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h1><h2 id="迭代法"><a href="#迭代法" class="headerlink" title="迭代法"></a>迭代法</h2><h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * struct ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode *next;</span></span><br><span class="line"><span class="comment"> *     ListNode(int x) : val(x), next(NULL) &#123;&#125;</span></span><br><span class="line"><span class="comment"> * &#125;;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">ListNode* <span class="title">reverseList</span><span class="params">(ListNode* head)</span> </span>&#123;</span><br><span class="line">        ListNode* prev = <span class="literal">nullptr</span>;</span><br><span class="line">        <span class="keyword">while</span> (head) &#123;</span><br><span class="line">            ListNode* tmpNext = head-&gt;next;</span><br><span class="line">            head-&gt;next = prev;</span><br><span class="line">            prev = head;</span><br><span class="line">            head = tmpNext;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> prev;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>画图分析：</p>
+<p>每个部分的蓝色是我们预先定义的一些变量，下边的 红色-&gt;黄色-&gt;绿色 是我们反转链表的步骤（标注了1，2，3以方便理解）。</p>
+<p><img src="/posts/Leetcode-206-Reverse-Linked-List-2019-10-09/C:/Users\76519\AppData\Roaming\Typora\typora-user-images\1570627740137.png" alt="1570627740137"></p>
+<h2 id="递归法"><a href="#递归法" class="headerlink" title="递归法"></a>递归法</h2><h3 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * struct ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode *next;</span></span><br><span class="line"><span class="comment"> *     ListNode(int x) : val(x), next(NULL) &#123;&#125;</span></span><br><span class="line"><span class="comment"> * &#125;;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">ListNode* <span class="title">reverseList</span><span class="params">(ListNode* head)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (head == <span class="literal">nullptr</span> || head-&gt;next == <span class="literal">nullptr</span>) <span class="keyword">return</span> head;</span><br><span class="line">        ListNode* node = reverseList(head-&gt;next);</span><br><span class="line">        head-&gt;next-&gt;next = head;</span><br><span class="line">        head-&gt;next = <span class="literal">nullptr</span>;</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h3><p>简单来说，递归法的思路是这样的</p>
+<ul>
+<li>首先我们将头部后边的反转；</li>
+<li>然后我们将后边的尾巴连接到头上；</li>
+<li>然后把头的<code>next</code>指向<code>nullptr</code>；</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Leetcode</category>
+      </categories>
+      <tags>
+        <tag>Leetcode</tag>
+        <tag>Linked List</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Effective C++ 笔记</title>
+    <url>/posts/Effective-C-%E7%AC%94%E8%AE%B0-2019-09-21/</url>
+    <content><![CDATA[<a id="more"></a>
+<p>[TOC]</p>
+<h1 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h1><h2 id="01-explicit关键字"><a href="#01-explicit关键字" class="headerlink" title="01. explicit关键字"></a>01. <code>explicit</code>关键字</h2><p>通常会将一个构造函数声明为<code>explicit</code>，可以防止被隐式转换。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">B</span><span class="params">(<span class="keyword">int</span> x=<span class="number">0</span>)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">DoSomething</span><span class="params">(B objB)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 此时若没有explicit，那么</span></span><br><span class="line">DoSomething(<span class="number">3</span>); <span class="comment">// 是可以运行的</span></span><br><span class="line"><span class="comment">// 有explicit，那么便不可以了，只能写成</span></span><br><span class="line">DoSomething(B(<span class="number">3</span>)); <span class="comment">// 这个样子</span></span><br></pre></td></tr></table></figure>
+<h2 id="02-copy-方法"><a href="#02-copy-方法" class="headerlink" title="02. copy 方法"></a>02. copy 方法</h2><p>有两种</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    B();</span><br><span class="line">    B(<span class="keyword">const</span> B&amp;);</span><br><span class="line">    B&amp; <span class="keyword">operator</span>=(<span class="keyword">const</span> B&amp;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>如果声明了新的对象，那么一定会调用一个构造函数：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">B b1; <span class="comment">// 调用默认构造函数</span></span><br><span class="line">B b2 = b1; <span class="comment">// 调用copy构造函数</span></span><br></pre></td></tr></table></figure>
+<p>而如果只是单纯的赋值，才会调用<code>=</code>函数：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">B b1, b2; <span class="comment">// 都会调用默认构造函数</span></span><br><span class="line">b2 = b1; <span class="comment">// 此时会调用赋值函数</span></span><br></pre></td></tr></table></figure>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="条款01：视C-为一个语言联邦"><a href="#条款01：视C-为一个语言联邦" class="headerlink" title="条款01：视C++为一个语言联邦"></a>条款01：视C++为一个语言联邦</h2><p>把C++看作四个子语言的联合体</p>
+<ul>
+<li>C</li>
+<li>面向对象的机制</li>
+<li>模板（template），泛型</li>
+<li>STL</li>
+</ul>
+<p>每个部分都有自己的规约，当你切换的时候可能会被要求遵循不同的规约。</p>
+<h2 id="条款02：用const-enum-inline而不是define"><a href="#条款02：用const-enum-inline而不是define" class="headerlink" title="条款02：用const,enum,inline而不是define"></a>条款02：用<code>const,enum,inline</code>而不是<code>define</code></h2><p>推荐使用<code>const</code>定义常量而不是宏，值得注意的是，类内部定义时静态常量时，推荐使用类外的定义式和初始化。</p>
+<blockquote>
+<p>类内的初始化可能不能被识别，视编译器而定</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 声明文件</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> &#123;</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 这里的叫做声明式</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> AIntVal;</span><br><span class="line">    <span class="comment">// 对某些编译器而言，支持整数常量的类内初始化，比如：</span></span><br><span class="line">    <span class="comment">// static const int AIntVal = 2;</span></span><br><span class="line">    <span class="comment">// 请注意，也只有整数类型才可以，下边的double不可以</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">double</span> ADoubleVal;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实现文件</span></span><br><span class="line"><span class="comment">// 下面的则是定义式</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> B::AIntVal = <span class="number">2</span>; </span><br><span class="line"><span class="comment">// 如果之前有类内初始化，那么类外也可以只写一个定义式：</span></span><br><span class="line"><span class="comment">// const int B::AIntVal;</span></span><br><span class="line"><span class="comment">// 如果不需要对这个变量进行取地址操作，定义式也可以不写</span></span><br><span class="line"><span class="comment">// 但是这也要视编译器的实现而定，有些编译器会强制要求提供一个定义式</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">double</span> B::ADoubleVal = <span class="number">2.5</span>;</span><br></pre></td></tr></table></figure>
+<p>一个类内初始化的必要应用场景是在类的编译期间需要使用这个常量的值，比如：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> &#123;</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> NameLen = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">char</span> name[NameLen];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>此时<code>NameLen</code>变量便不可以在类外初始化了，而如果编译器不支持类内初始化，此时我们可以使用<code>enum</code>关键字。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> &#123;</span></span><br><span class="line">    <span class="keyword">enum</span> &#123; NameLen = <span class="number">5</span> &#125;;</span><br><span class="line">    <span class="keyword">char</span> name[NameLen];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这样声明的<code>NameLen</code>和<code>#define</code>得到的常量的行为是十分相似的，比如不能使用取地址等操作。</p>
+<p>最后是使用<code>inline</code>关键字，宏函数太过丑陋，因此使用<code>inline</code>搭配<code>template</code>是更好的做法。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CALL_WITH_MAX(a, b) \</span></span><br><span class="line">    (f((a) &gt; (b) ? (a) : (b)))</span><br><span class="line"></span><br><span class="line"><span class="comment">// 丑陋的括号，而且哪怕是这样还是会出现问题，比如有人会用</span></span><br><span class="line"><span class="keyword">int</span> a = <span class="number">2</span>;</span><br><span class="line">CALL_WITH_MAX(a++, <span class="number">0</span>);</span><br><span class="line">a = <span class="number">2</span>;</span><br><span class="line">CALL_WITH_MAX(a++, <span class="number">4</span>);</span><br><span class="line"><span class="comment">// 这两次调用后a的值是不一样的</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 所以最好使用</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="keyword">void</span> <span class="title">CALL_WITH_MAX</span><span class="params">(<span class="keyword">const</span> T&amp; a, <span class="keyword">const</span> T&amp; b)</span> </span>&#123;</span><br><span class="line">    f(a &gt; b ? a : b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而且<code>inline</code>函数还会提供一个函数的作用域，而<code>define</code>里如果添加了新的变量，会造成作用域的混乱。当然也是有解决办法的：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TEST_FUNC(a) \</span></span><br><span class="line">    <span class="keyword">do</span> &#123; \</span><br><span class="line">        <span class="keyword">int</span> inner = <span class="number">0</span>; \</span><br><span class="line">    &#125; <span class="keyword">while</span>(<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="条款03-尽可能的使用const关键字"><a href="#条款03-尽可能的使用const关键字" class="headerlink" title="条款03 尽可能的使用const关键字"></a>条款03 尽可能的使用<code>const</code>关键字</h2><p>先写写<code>const</code>的用法啊</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>const的位置</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>const int a = 2;</code></td>
+<td><code>a</code>的值不能被修改</td>
+</tr>
+<tr>
+<td><code>const int *p = &amp;a;</code></td>
+<td><code>p</code>不会被修改，即<code>p</code>这个指针不会指向其他地方了</td>
+</tr>
+<tr>
+<td><code>int* const p = &amp;a;</code></td>
+<td>即<code>p</code>这个指针指向的值不可以更改</td>
+</tr>
+<tr>
+<td><code>const int* const p = &amp;a;</code></td>
+<td>即<code>p</code>这个指针指向的值和自己都不能发生更改。</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code>const</code>还可以放在类内</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>Hello World</title>
+    <url>/posts/hello-world-2019-09-21/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+<blockquote><p>Do not just seek happiness for yourself. Seek happiness for all. Through kindness. Through mercy.</p>
+<footer><strong>David Levithan</strong><cite>Wide Awake</cite></footer></blockquote>
+]]></content>
+  </entry>
+  <entry>
+    <title>Leetcode 97. Interleaving String</title>
+    <url>/posts/Leetcode%2097.%20Interleaving%20String-2019-09-21/</url>
+    <content><![CDATA[<p>Given <em>s1, s2, s3</em>, find whether <em>s3</em> is formed by the interleaving of <em>s1</em> and <em>s2</em>.</p>
+<p><strong>Example 1:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbcbcac&quot;</span><br><span class="line">Output: true</span><br></pre></td></tr></table></figure>
+<p><strong>Example 2:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbbaccc&quot;</span><br><span class="line">Output: false</span><br></pre></td></tr></table></figure>
+<h2 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h2><p>使用动态规划求解。</p>
+<p>首先我们分解子问题。如果s3是s1和s2的交错字符串的话，那么一定有以下的一种情况</p>
+<ul>
+<li>s3的最后一位和s2的最后一位相同，此时s3前边的子串(除去最后一位)一定是<strong>s2的前边的子串与s1的交错字符串。</strong></li>
+<li>s3的最后一位和s1的最后一位相同，此时s3前边的子串(除去最后一位)一定是<strong>s1的前边的子串与s2的交错字符串。</strong></li>
+</ul>
+<p>这个很容易想到，因为构造出交错的字符串的时候肯定是从s1选1个char，又从s2选1个char，所以如果当前是交错的串的话，去掉最后一位相同的位之后，前边的串肯定也是根据这个规则构造来的，所以也是交错的字符串。</p>
+<p>因此我们可以写出迭代方程：</p>
+<script type="math/tex; mode=display">
+length·of·s3 = l \\
+length·of·s2 = n \\
+length·of·s1 = m \\
+isInterleave(s3[0...l]) = \\
+        (s3[l] == s2[n] ^ isInterleave(s1[0...m], s2[0...n-1], s3[0...l-1])) \\
+    or  (s3[l] == s1[m] ^ isInterleave(s1[0...m-1], s2[0...n], s3[0...l-1])) \\</script><p>基于此方程我们写出如下的解：</p>
+<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">isInterleave</span><span class="params">(<span class="built_in">string</span> s1, <span class="built_in">string</span> s2, <span class="built_in">string</span> s3)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> m = s1.length(), n = s2.length(), l = s3.length();</span><br><span class="line">        <span class="keyword">if</span> (m + n != l) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        <span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">bool</span>&gt;&gt; dp(m+<span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="keyword">bool</span>&gt;(n+<span class="number">1</span>, <span class="literal">false</span>));</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m+<span class="number">1</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; n+<span class="number">1</span>; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (i == <span class="number">0</span> &amp;&amp; j == <span class="number">0</span>) dp[<span class="number">0</span>][<span class="number">0</span>] = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">0</span>) dp[i][j] = dp[i][j<span class="number">-1</span>] &amp;&amp; s2[j<span class="number">-1</span>] == s3[i+j<span class="number">-1</span>];</span><br><span class="line">                <span class="comment">// when i = 0, j = 1</span></span><br><span class="line">                <span class="comment">// dp[0][1] = dp[0][0] and s2[1] == s3[1]</span></span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (j == <span class="number">0</span>) dp[i][j] = dp[i<span class="number">-1</span>][j] &amp;&amp; s1[i<span class="number">-1</span>] == s3[i+j<span class="number">-1</span>];</span><br><span class="line">                <span class="comment">// when i = 1, j = 0</span></span><br><span class="line">                <span class="comment">// dp[1][0] = dp[0][0] and s1[1] == s3[1]</span></span><br><span class="line">                <span class="keyword">else</span> dp[i][j] = (dp[i<span class="number">-1</span>][j] &amp;&amp; s1[i<span class="number">-1</span>]==s3[i+j<span class="number">-1</span>]) || (dp[i][j<span class="number">-1</span>] &amp;&amp; s2[j<span class="number">-1</span>]==s3[i+j<span class="number">-1</span>]);</span><br><span class="line">                <span class="comment">// when i = 1, j = 1</span></span><br><span class="line">                <span class="comment">// dp[1][1] = </span></span><br><span class="line">                <span class="comment">//      | dp[0][1] &amp;&amp; s1[1] == s3[2]</span></span><br><span class="line">                <span class="comment">//      | dp[1][0] &amp;&amp; s2[1] == s3[1]</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dp[m][n];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>String</tag>
+        <tag>Algorithm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Leetcode 264. Ugly Number II</title>
+    <url>/posts/Leetcode%20264.%20Ugly%20Number%20II-2019-09-21/</url>
+    <content><![CDATA[<p>Write a program to find the <code>n</code>-th ugly number.</p>
+<p>Ugly numbers are <strong>positive numbers</strong> whose prime factors only include <code>2, 3, 5</code>. </p>
+<p><strong>Example:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input: n = 10</span><br><span class="line">Output: 12</span><br><span class="line">Explanation: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12 is the sequence of the first 10 ugly numbers.</span><br></pre></td></tr></table></figure>
+<p><strong>Note:</strong>  </p>
+<ol>
+<li><code>1</code> is typically treated as an ugly number.</li>
+<li><code>n</code> <strong>does not exceed 1690</strong>.</li>
+</ol>
+<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">nthUglyNumber</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i2 = <span class="number">0</span>, i3 = <span class="number">0</span>, i5 = <span class="number">0</span>;</span><br><span class="line">        <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; dp &#123;<span class="number">1</span>&#125;;       </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;            </span><br><span class="line">            <span class="keyword">int</span> m = min( min(dp[i2]*<span class="number">2</span>, dp[i3]*<span class="number">3</span>), dp[i5]*<span class="number">5</span> );</span><br><span class="line">            dp.push_back(m);</span><br><span class="line">            <span class="keyword">if</span> (m == dp[i2]*<span class="number">2</span>) i2++;</span><br><span class="line">            <span class="keyword">if</span> (m == dp[i3]*<span class="number">3</span>) i3++;</span><br><span class="line">            <span class="keyword">if</span> (m == dp[i5]*<span class="number">5</span>) i5++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dp[n<span class="number">-1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h2><p>应该大家看着还是挺迷茫的，我们从题目开始思考，要找的是质因数只有2、3、5的数，那么我们可以产生两种思路，<strong>一种是验证的思路</strong>，对于每个数进行验证，判断他是否有2、3、5之外的质因子；<strong>或者是采用构造的思路</strong>，从某个数开始构造满足这个条件的数字。</p>
+<p>明显第一种思路耗时很久，毕竟现在还是没有很好地判断因子分解的算法。从另一种思路出发，我们可以这样考虑：所有以2、3、5为因子的数相乘并不会产生其他的素数作为因子，我们可以简单地推导一下</p>
+<ol>
+<li>很明显素数 $p$ 和 $q$ 相乘时，$pq$不存在其他的素数作为它的因子；</li>
+<li>$ p^i q^j $明显也没有其他素数作为因子</li>
+</ol>
+<p>因此这个算法应该是成立的！</p>
+<p>因此，又为了排序的目的，我们逐个取最小值产生<code>ugly number</code>的数组。</p>
+<p>如下：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">t2 = <span class="number">0</span>, t3 = <span class="number">0</span>, t5 = <span class="number">0</span> </span><br><span class="line">uglg numbers [<span class="number">0</span>] = <span class="number">1</span></span><br><span class="line"><span class="keyword">for</span> i from <span class="number">1</span> to n</span><br><span class="line">	uglg numbers [i] = min( uglg numbers [t2], </span><br><span class="line">							uglg numbers [t3], </span><br><span class="line">							uglg numbers [t5])</span><br><span class="line"><span class="keyword">return</span> uglg numbers [n<span class="number">-1</span>]</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>Algorithm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Leetcode 152. Maximum Product Subarray</title>
+    <url>/posts/Leetcode%20152.%20Maximum%20Product%20Subarray-2019-09-21/</url>
+    <content><![CDATA[<h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><p>Given an integer array <code>nums</code>, find the contiguous subarray within an array (containing at least one number) which has the largest product.</p>
+<p><strong>Example 1:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input: [2,3,-2,4]</span><br><span class="line">Output: 6</span><br><span class="line">Explanation: [2,3] has the largest product 6.</span><br></pre></td></tr></table></figure>
+<p><strong>Example 2:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input: [-2,0,-1]</span><br><span class="line">Output: 0</span><br><span class="line">Explanation: The result cannot be 2, because [-2,-1] is not a subarray.</span><br></pre></td></tr></table></figure>
+<h2 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h2><p>这道题的目标是找到最大乘积的子串，还是比较复杂的，看题目就感觉是一道动态规划，我们<strong>首先肯定想到的是这样的递推公式</strong>：</p>
+<script type="math/tex; mode=display">
+maxProduct[i] = max\{ maxProduct[i-1] * nums[i] , nums[i] \}</script><p>其中，<code>maxProduct[i]</code>表示以第<code>i</code>位结尾的所有子串的最大乘积，所以要么选择<code>nums[i]</code>乘进去得到更大的值，要么不选择它，而是从他开始重新计算一个子串。</p>
+<p><strong>这个解法会遇到一个问题</strong>，比如<code>[1, 2, -3, -5]</code>，在面对两个负数的时候，我们的解法遇到-3时就会把它去掉而在-3的地方重新计算。即，<code>maxProduct[i] = nums[i] = 3</code> ，但是，如果我们保留<code>maxProduct[2] = maxProduct[i-1]*nums[i] = -6</code>，那么我们在计算到-5时就可以得到更大的值30。</p>
+<p><strong>考虑这样的情况，我们要改造我们的算法</strong>，我们在保留最大的乘积的同时，保留一个最小的负值，期望这个负值可以让最终得到另一个负值时可以得到更大的计算结果。即：</p>
+<p>当<code>nums[i]</code>为正值时：</p>
+<script type="math/tex; mode=display">
+postiveMax[i] = max \{ nums[i] , postiveMax[i-1]*nums[i] \} \\
+negtiveMin[i] = min \{ nums[i] , negtiveMin[i-1]*nums[i] \}</script><p>很简单，最小的负值就是当前的最小负值乘上<code>nums[i]</code>或者本身（重新开始），最大的正值也就是当前的最大正值乘上<code>nums[i]</code>或者本身（重新开始）。</p>
+<p>当<code>nums[i]</code>为负值时：</p>
+<script type="math/tex; mode=display">
+postiveMax[i] = max\{ nums[i] , negtiveMin[i-1]*nums[i] \}  \\
+negtiveMin[i] = min\{ nums[i] , postiveMax[i-1]*nums[i] \};</script><p>此时，最大正值可以通过最大的负值乘以当前的负<code>nums[i]</code>得来，也就解决了上面的问题。</p>
+<p>下面我们进行实现：</p>
+<h2 id="Solution-1"><a href="#Solution-1" class="headerlink" title="Solution 1"></a>Solution 1</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">maxProduct</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; nums)</span> </span>&#123;  </span><br><span class="line">        <span class="keyword">int</span> re = nums[<span class="number">0</span>];</span><br><span class="line">        <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; postiveMax(nums);</span><br><span class="line">        <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; negtiveMin(nums);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; nums.size(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> ( nums[i] &lt; <span class="number">0</span> ) &#123;</span><br><span class="line">                postiveMax[i] = max( nums[i] , negtiveMin[i<span class="number">-1</span>]*nums[i] );</span><br><span class="line">                negtiveMin[i] = min( nums[i] , postiveMax[i<span class="number">-1</span>]*nums[i] );</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                postiveMax[i] = max( nums[i] , postiveMax[i<span class="number">-1</span>]*nums[i] );</span><br><span class="line">                negtiveMin[i] = min( nums[i] , negtiveMin[i<span class="number">-1</span>]*nums[i] );</span><br><span class="line">            &#125;</span><br><span class="line">            re = max(re, postiveMax[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> re;</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>还可以进行一些小小的优化使得代码量更加减少：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">maxProduct</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; nums)</span> </span>&#123;  </span><br><span class="line">        <span class="keyword">int</span> re = nums[<span class="number">0</span>];</span><br><span class="line">        <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; postiveMax(nums), negtiveMin(nums);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; nums.size(); i++) &#123;            </span><br><span class="line">            postiveMax[i] = max( postiveMax[i<span class="number">-1</span>]*nums[i] , </span><br><span class="line">                                max( nums[i] , negtiveMin[i<span class="number">-1</span>]*nums[i] ) );</span><br><span class="line">            negtiveMin[i] = min( negtiveMin[i<span class="number">-1</span>]*nums[i] , </span><br><span class="line">                                min( nums[i] , postiveMax[i<span class="number">-1</span>]*nums[i] ) );</span><br><span class="line">            re = max(re, postiveMax[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> re;</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>把判断<code>nums[i]</code>正负性的一步去掉了，因为我们其实无需关心到底是取了哪一个，我们只要它拿到最小和最大即可了。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>我们分析这里的复杂度，发现空间复杂度是O(n)，时间复杂度也是O(n)。</p>
+<p>这个解法还是可以更加优化一下的，空间复杂度可以降为O(1)，即每次只保留前一次(<code>max[i-1]</code>)的结果就好了， 不需要知道前(<code>max[i-2, i-3, ...]</code>)的内容。</p>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>Algorithm</tag>
+        <tag>Array</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>LeetCode 87. Scramble String</title>
+    <url>/posts/LeetCode%2087.%20Scramble%20String-2019-09-21/</url>
+    <content><![CDATA[<h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><p>Given a string <em>s1</em>, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively.</p>
+<p>Below is one possible representation of <em>s1</em> = <code>&quot;great&quot;</code>:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    great</span><br><span class="line">   /    \</span><br><span class="line">  gr    eat</span><br><span class="line"> / \    /  \</span><br><span class="line">g   r  e   at</span><br><span class="line">           / \</span><br><span class="line">          a   t</span><br></pre></td></tr></table></figure>
+<p>To scramble the string, we may choose any non-leaf node and swap its two children.</p>
+<p>For example, if we choose the node <code>&quot;gr&quot;</code> and swap its two children, it produces a scrambled string <code>&quot;rgeat&quot;</code>.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    rgeat</span><br><span class="line">   /    \</span><br><span class="line">  rg    eat</span><br><span class="line"> / \    /  \</span><br><span class="line">r   g  e   at</span><br><span class="line">           / \</span><br><span class="line">          a   t</span><br></pre></td></tr></table></figure>
+<p>We say that <code>&quot;rgeat&quot;</code> is a scrambled string of <code>&quot;great&quot;</code>.</p>
+<p>Similarly, if we continue to swap the children of nodes <code>&quot;eat&quot;</code> and <code>&quot;at&quot;</code>, it produces a scrambled string <code>&quot;rgtae&quot;</code>.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    rgtae</span><br><span class="line">   /    \</span><br><span class="line">  rg    tae</span><br><span class="line"> / \    /  \</span><br><span class="line">r   g  ta  e</span><br><span class="line">       / \</span><br><span class="line">      t   a</span><br></pre></td></tr></table></figure>
+<p>We say that <code>&quot;rgtae&quot;</code> is a scrambled string of <code>&quot;great&quot;</code>.</p>
+<p>Given two strings <em>s1</em> and <em>s2</em> of the same length, determine if <em>s2</em> is a scrambled string of <em>s1</em>.</p>
+<p><strong>Example 1:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input: s1 = &quot;great&quot;, s2 = &quot;rgeat&quot;</span><br><span class="line">Output: true</span><br></pre></td></tr></table></figure>
+<p><strong>Example 2:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input: s1 = &quot;abcde&quot;, s2 = &quot;caebd&quot;</span><br><span class="line">Output: false</span><br></pre></td></tr></table></figure>
+<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><blockquote>
+<p><strong>283 / 283</strong> test cases passed.</p>
+<p>Status: <strong>Accepted</strong></p>
+<p>Runtime: <strong>0 ms</strong></p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">isScramble</span><span class="params">(<span class="built_in">string</span> s1, <span class="built_in">string</span> s2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(s1==s2)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">int</span> len = s1.length();</span><br><span class="line">        <span class="keyword">int</span> count[<span class="number">26</span>] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;len; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            count[s1[i]-<span class="string">'a'</span>]++;</span><br><span class="line">            count[s2[i]-<span class="string">'a'</span>]--;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">26</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(count[i]!=<span class="number">0</span>)</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=len<span class="number">-1</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>( isScramble(s1.substr(<span class="number">0</span>,i), s2.substr(<span class="number">0</span>,i)) &amp;&amp; isScramble(s1.substr(i), s2.substr(i)))</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">if</span>( isScramble(s1.substr(<span class="number">0</span>,i), s2.substr(len-i)) &amp;&amp; isScramble(s1.substr(i), s2.substr(<span class="number">0</span>,len-i)))</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h2><p>可以分析一下，两个串是 <code>isScramble</code> 的话，那么其中一个串，是通过另一个串进行多次的交换得来的。交换可以交换两个相邻的字符，也可以交换相邻的子串。</p>
+<p>类似的我们可以分析，如果两个串满足这个性质，那么我们可以把它们都分为两个长度相同的部分（前i位，记为s11, s21，和后n-i位，记为s12, s22）。</p>
+<p>思路很简单，如果两个串是 <code>isScramble</code> 的话，那么肯定是上下相对应，或者交换后相对应（即满足isScramble的)。也就是说，我们可以通过分别验证这两个性质来确认其是否满足条件，只要有一个满足，那么它就是isScramble的。</p>
+<p>在这样的思路上我们可以做一些优化，比如将每次递归的结果存起来，使得递归到已经算过的子串的时候可以直接获取答案而不是再次进行计算。</p>
+<p>但是在实际使用中发现优化后的代码运行速度并不快，我推测这是因为当前递归程序的重复计算已经被消除了，相同的子串不会进行多次判断，因而完全无需进行记忆性的递归。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><ul>
+<li><strong>时间复杂度：</strong> 这是一个递归算法，每次循环n次，最多递归n层，时间复杂度为O(n!)，这是最坏情况</li>
+</ul>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>String</tag>
+        <tag>Algorithm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CMake 从0开始</title>
+    <url>/posts/CMake-%E4%BB%8E0%E5%BC%80%E5%A7%8B-2019-09-06/</url>
+    <content><![CDATA[<p>从CMake是什么讲到如何写一个简单的CMake工程，再到CMake的一些常用的变量和函数介绍。</p>
+<p>希望可以教会大家入门CMake。</p>
+<a id="more"></a>
+<p>[TOC]</p>
+<h2 id="CMake是什么"><a href="#CMake是什么" class="headerlink" title="CMake是什么"></a>CMake是什么</h2><p>CMake的全称是：Cross Platform Make，即跨平台Make；CMake到底是什么呢？WikiPedia的解释是这样的：</p>
+<blockquote>
+<p><strong>CMake</strong>是个一个<a href="https://zh.wikipedia.org/wiki/开源" target="_blank" rel="noopener">开源</a>的<a href="https://zh.wikipedia.org/wiki/跨平台" target="_blank" rel="noopener">跨平台</a><a href="https://zh.wikipedia.org/wiki/Build_automation" target="_blank" rel="noopener">自动化建构</a>系统，用来管理软件建置的程序，并不依赖于某特定编译器，并可支持多层目录、多个应用程序与多个库。 </p>
+<p>:link: 链接：<a href="https://zh.wikipedia.org/wiki/CMake" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/CMake</a></p>
+</blockquote>
+<p>比较难以理解吼，使用过命令行编译或者Unix的Makefile进行构建的同学应该大概可以类比一下，CMake就是一个写脚本然后可以生成Makefile一类的文件的程序。</p>
+<blockquote>
+<p>只用IDE进行过工程开发的同学可能不太能理解，但是可以注意一下：大部分IDE需要新建工程，新建工程后会多出来一些工程文件（比如Eclipse，Visual Studio……都会自己建），里边描述了依赖的头文件路径啊，依赖的库文件的路径啊，文件之间的依赖关系啊什么的，这其实就是CMake会生成的东西。</p>
+</blockquote>
+<p>所以简单地说， CMake是用来进行构建的一个东西（随便你叫它语言也好、程序也好，反正就是这么一个东西），写CMake的脚本，就可以生成Makefile，就可以用Unix的Make进行编译了。</p>
+<p>听起来还挺酷的！那么问题来了，怎么写这些东西呢？、</p>
+<p>首先我们来介绍一下CMake的文件编排方式和结构。</p>
+<h2 id="CMake工程的文件和结构"><a href="#CMake工程的文件和结构" class="headerlink" title="CMake工程的文件和结构"></a>CMake工程的文件和结构</h2><p>CMake的文件大概可以分为几类：</p>
+<ul>
+<li><strong>CMakeLists.txt</strong>：描述构建信息。CMake中负责构建的文件都命名为 <strong>CMakeLists.txt</strong>。通常来说，每个模块处于一个单独的文件夹中，这样的每个文件夹都有一个专职的CMakeLists.txt负责描述它的构建需求。</li>
+<li><strong>.cmake文件</strong>：通常会放一些函数啊，或者专门负责定义一类变量什么的，可以在CMakeLists.txt中用<code>include</code>命令调用这一类文件，会顺序执行其中的语句。</li>
+</ul>
+<p>也就是说，一个项目的工程目录可能是这样的：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">RootDir</span><br><span class="line">├─CMakeLists.txt		<span class="comment"># 一个根目录下的顶层CMakeLists.txt</span></span><br><span class="line">├─cmake/				<span class="comment"># cmake文件夹，存放一些构建需要的脚本什么的</span></span><br><span class="line">|  ├─utils.cmake		<span class="comment"># 一个.cmake文件，utils表示存放了一些工具性的函数</span></span><br><span class="line">├─build/				<span class="comment"># build文件夹，用作存放生成构建中间+最终文件的目录</span></span><br><span class="line">├─server/				<span class="comment"># 一个子模块文件夹，比如：服务器程序，Server</span></span><br><span class="line">│  ├─CMakeLists.txt		<span class="comment"># 子模块通常也要一个CMakeLists.txt</span></span><br><span class="line">|  ├─include/</span><br><span class="line">│  |   ├─a.hpp</span><br><span class="line">│  |   └─b.hpp</span><br><span class="line">│  └─src/</span><br><span class="line">│      ├─a.cpp</span><br><span class="line">│      └─b.cpp</span><br><span class="line">└─client/				<span class="comment"># 另一个子模块，比如：客户端程序，Client</span></span><br><span class="line">   ├─CMakeLists.txt		<span class="comment"># 另一个子模块的CMakeLists.txt</span></span><br><span class="line">   ├─include/</span><br><span class="line">   |   └─c.hpp</span><br><span class="line">   └─src/</span><br><span class="line">       └─c.cpp</span><br></pre></td></tr></table></figure>
+<p>根目录下的CMakeLists.txt是整个CMake程序的入口，而子目录下的CMakeLists.txt会编译出两个可执行文件来（当然</p>
+<p>那么CMakeLists.txt怎么写呢？</p>
+<h2 id="写一个顶层的CMakeLists-txt文件"><a href="#写一个顶层的CMakeLists-txt文件" class="headerlink" title="写一个顶层的CMakeLists.txt文件"></a>写一个顶层的CMakeLists.txt文件</h2><p>顶层CMakeLists.txt文件是整个CMake构建的入口，因此通常来说会设置一些全局通用的变量啊，还要将所有的子目录包含进来。</p>
+<p>顶层文件比子目录下的CMakeLists.txt多出来的（也是必不可少的）是如下的两句话：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.12</span>)</span><br><span class="line"><span class="comment"># cmake_minimum_required(VERSION major[.minor[.patch[.tweak]]] [FATAL_ERROR])</span></span><br><span class="line"><span class="keyword">project</span>(M_PROJECT	C)</span><br><span class="line"><span class="comment"># project(&lt;PROJECT-NAME&gt;</span></span><br><span class="line"><span class="comment">#        [VERSION &lt;major&gt;[.&lt;minor&gt;[.&lt;patch&gt;[.&lt;tweak&gt;]]]]</span></span><br><span class="line"><span class="comment">#        [LANGUAGES &lt;language-name&gt;...])</span></span><br></pre></td></tr></table></figure>
+<p>然后我们可以使用<code>add_subdirectory</code>来添加我们的子目录，比如：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">add_subdirectory</span>(./client)</span><br><span class="line"><span class="keyword">add_subdirectory</span>(./server)</span><br></pre></td></tr></table></figure>
+<p>这样，CMake就会自动的读取这两个子目录下的CMakeLists.txt文件，然后进行解析。</p>
+<h2 id="使用CMakeLists-txt描述一个构建目标"><a href="#使用CMakeLists-txt描述一个构建目标" class="headerlink" title="使用CMakeLists.txt描述一个构建目标"></a>使用CMakeLists.txt描述一个构建目标</h2><p>在子目录下的每个CMakeLists.txt文件一般会用来描述一个具体的构建目标（当然，如果工程比较简单的话，直接放在顶层的CMakeLists.txt里也是完全OK的）。</p>
+<p>我们来举个简单的栗子，比如如下的这条编译命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ g++ main.cpp lib.cpp -o demo -I../include -lpthread -DA_PREDEF_MACRO=STH</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>解释一下，是将两个<strong>cpp</strong>源文件一起编译成一个可执行文件，叫做<strong>demo</strong>；我们还给这个编译命令添加了一个包含目录，是<strong>../include</strong>；还有一个预定义的宏，即<code>A_PREDEF_MACRO</code>，值为<code>STH</code>；同时还指定了一个链接库，即<strong>pthread</strong>；</p>
+</blockquote>
+<p>我们把这个改编成一个CMakeLists.txt来看看。</p>
+<p>首先，我们需要明确，我们的构建目标是一个可执行文件，叫做<strong>demo</strong>。所以，我们需要添加一个target。</p>
+<blockquote>
+<p>这里的<strong>目标（target）</strong>是一个很重要的概念，不管是CMake还是Makefile，整个构建都是围绕着target来的。这个target可以是可执行文件，也可以是一个.a的静态库文件，或者.so的动态库，都是可以的。</p>
+</blockquote>
+<p>这个<code>target</code>肯定需要指定源文件，因此CMake将添加源文件的操作与添加target放在一起，如下：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">add_executable</span>(demo		main.cpp lib.cpp) </span><br><span class="line"><span class="comment"># &lt;=&gt;</span></span><br><span class="line"><span class="comment"># g++ main.cpp lib.cpp -o demo</span></span><br></pre></td></tr></table></figure>
+<p>然后我们处理我们加入的其他的选项，比如添加包含目录<code>-I../include</code>，如下：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">target_include_directories</span>(demo	PRIVATE ../<span class="keyword">include</span>)</span><br><span class="line"><span class="comment"># &lt;=&gt;</span></span><br><span class="line"><span class="comment"># g++ ... -I../include</span></span><br></pre></td></tr></table></figure>
+<p>我们还给他添加了链接库，链接到<code>pthread</code>库<code>-lpthread</code>，如下：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">target_link_libraries</span>(demo	PRIVATE pthread)</span><br><span class="line"><span class="comment"># &lt;=&gt;</span></span><br><span class="line"><span class="comment"># g++ ... -lpthread</span></span><br></pre></td></tr></table></figure>
+<p>我们还添加了编译期定义的宏变量<code>-DA_PREDEF_MACRO=STH</code>，如下：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">target_compile_options</span>(demo	PRIVATE -DA_PREDEF_MACRO=STH)</span><br><span class="line"><span class="comment"># OR</span></span><br><span class="line"><span class="comment"># target_compile_definitions(demo PRIVATE A_PREDEF_MACRO=STH)</span></span><br><span class="line"><span class="comment"># &lt;=&gt;</span></span><br><span class="line"><span class="comment"># g++ ... -DA_PREDEF_MACRO=STH</span></span><br></pre></td></tr></table></figure>
+<p>把上边这几句话组合到一个CMakeLists.txt文件中，就完成了对如何编译<code>demo</code>这个可执行程序的完整描述。</p>
+<h2 id="CMake的一些基础语法"><a href="#CMake的一些基础语法" class="headerlink" title="CMake的一些基础语法"></a>CMake的一些基础语法</h2><h3 id="显示帮助信息-message"><a href="#显示帮助信息-message" class="headerlink" title="显示帮助信息 message()"></a>显示帮助信息 <code>message()</code></h3><p>当需要打印信息时，我们会使用这个函数，举个栗子：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">message</span>(<span class="string">"Hello,world"</span>)</span><br><span class="line"><span class="keyword">message</span>(STATUS <span class="string">"A status code"</span>) 		  <span class="comment"># STATUS 会在打印消息前加上两个-，比如 "-- ..."</span></span><br><span class="line"><span class="keyword">message</span>(AUTHOR_WARNING <span class="string">"A user warning"</span>)  <span class="comment"># AUTHOR WARNING 会把这条消息按照警告的格式输出</span></span><br><span class="line"><span class="keyword">message</span>(FATAL_ERROR	<span class="string">"An error"</span>)           <span class="comment"># FATAL_ERROR 会发送一个error然后退出程序</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其实还有很多其他的标记，去看看文档吧：<a href="https://cmake.org/cmake/help/v3.3/command/message.html?highlight=message" target="_blank" rel="noopener">https://cmake.org/cmake/help/v3.3/command/message.html?highlight=message</a></p>
+</blockquote>
+<h3 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h3><p>变量一般会用<code>set</code>来设置，比如</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">set</span>(<span class="keyword">target</span>	demo)</span><br></pre></td></tr></table></figure>
+<p>这样，我们就定义了一个变量，叫做<code>target</code>，其值为<strong>demo</strong>。</p>
+<p>那么如何访问这个变量的值呢？这一点上cmake和shell是非常相似的，我们可以通过<code>${}</code>来访问。比如：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">message</span>(STATUS <span class="variable">$&#123;target&#125;</span>) <span class="comment"># 打印：-- demo</span></span><br><span class="line"><span class="comment"># OR</span></span><br><span class="line"><span class="keyword">message</span>(STATUS <span class="string">"$&#123;target&#125;"</span>) <span class="comment"># 加双引号不影响解析，还是打印：-- demo</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>给<code>${target}</code>外边加个””是没有影响的，只是将其变成了一个真·字符串。</p>
+</blockquote>
+<p>如果需要使用列表的话，有两种不同的写法，比如：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">set</span>(aList  <span class="string">"demo1;demo2;demo3"</span>)</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line"><span class="keyword">set</span>(bList  demo1 demo2 demo3) <span class="comment"># 完全等价</span></span><br></pre></td></tr></table></figure>
+<h3 id="条件语句"><a href="#条件语句" class="headerlink" title="条件语句"></a>条件语句</h3><p>就是<code>if</code>啦，这是一个简单又不简单的语句，举个栗子：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (A <span class="keyword">EQUAL</span> B)</span><br><span class="line">	<span class="keyword">message</span>(<span class="string">"A equal to B"</span>)</span><br><span class="line"><span class="keyword">elseif</span>(A <span class="keyword">EQUAL</span> C)</span><br><span class="line">	<span class="keyword">message</span>(<span class="string">"A equal to C"</span>)</span><br><span class="line"><span class="keyword">endif</span>()</span><br></pre></td></tr></table></figure>
+<p><code>if</code>里的那个判断语句只是一个简单的栗子，CMake还提供了好多的判断方式，多给几个栗子尝一尝：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">IS_DIRECTORY</span> ../<span class="keyword">include</span>) ...</span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$&#123;aString&#125;</span> <span class="keyword">MATCHES</span> regex) ...</span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$&#123;aString&#125;</span> <span class="keyword">IN_LIST</span> <span class="variable">$&#123;a_list&#125;</span>) ...</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>好多好多，具体去看官网的说明吧：<a href="https://cmake.org/cmake/help/v3.3/command/if.html?highlight=#command:if" target="_blank" rel="noopener">https://cmake.org/cmake/help/v3.3/command/if.html?highlight=#command:if</a></p>
+</blockquote>
+<h3 id="foreach循环"><a href="#foreach循环" class="headerlink" title="foreach循环"></a><code>foreach</code>循环</h3><p>循环语句也好理解吼，举个栗子：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">foreach</span>(element IN LISTS a_list)</span><br><span class="line">    <span class="keyword">message</span>(<span class="string">"$&#123;arg&#125;"</span>)</span><br><span class="line"><span class="keyword">endforeach</span>()</span><br></pre></td></tr></table></figure>
+<p>简单的循环了一个列表，<code>foreach</code>还有不少其他的遍历方式，比如：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">foreach</span>(loop_var arg1 arg2 ...) ...</span><br><span class="line"><span class="keyword">foreach</span>(loop_var RANGE total) ...</span><br><span class="line"><span class="keyword">foreach</span>(loop_var IN ITEMS item1 item2) ...</span><br></pre></td></tr></table></figure>
+<p>还是蛮好理解的，也就不多做解释了</p>
+<blockquote>
+<p>老规矩，看官网：<a href="https://cmake.org/cmake/help/v3.0/command/foreach.html?highlight=foreach" target="_blank" rel="noopener">https://cmake.org/cmake/help/v3.0/command/foreach.html?highlight=foreach</a></p>
+</blockquote>
+<h3 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h3><p>函数有两种写法，一种是<code>macro</code>，另一种则是<code>function</code>。其实效果上是差不多的，我们都来举几个栗子。</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">macro</span>(m_macro cpu_type linux_name)</span><br><span class="line">  <span class="comment"># 假设就按照 m_macro(x86, ubuntu, a_unknown_parameter) 这样来调用</span></span><br><span class="line">  <span class="keyword">message</span>(<span class="string">"$&#123;cpu_type&#125;, $&#123;linux_name&#125;"</span>)  <span class="comment"># x86, ubuntu</span></span><br><span class="line">  <span class="comment"># ARGC 保存了传入的参数数量</span></span><br><span class="line">  <span class="keyword">message</span>(<span class="string">"$&#123;ARGC&#125;"</span>)                     <span class="comment"># 3</span></span><br><span class="line">  <span class="comment"># 可以使用 ARGV#n 来访问第n个参数</span></span><br><span class="line">  <span class="keyword">message</span>(<span class="string">"$&#123;ARGV0&#125;"</span>)                    <span class="comment"># x86</span></span><br><span class="line">  <span class="comment"># ARGN 保存了我们在声明中没有声明的变量，就是最后的几个</span></span><br><span class="line">  <span class="keyword">message</span>(<span class="string">"$&#123;ARGN&#125;"</span>)                     <span class="comment"># a_unknown_parameter</span></span><br><span class="line">  <span class="comment"># ARGV 保存了所有的参数列表</span></span><br><span class="line">  <span class="keyword">message</span>(<span class="string">"$&#123;ARGV&#125;"</span>)                     <span class="comment"># x86;ubuntu;a_unknown_parameter</span></span><br><span class="line"><span class="keyword">endmacro</span>(m_macro)</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span>(m_function cpu_type linux_name)</span><br><span class="line">  <span class="comment"># 假设就按照 m_function(x86, ubuntu, a_unknown_parameter) 这样来调用</span></span><br><span class="line">  <span class="keyword">message</span>(<span class="string">"$&#123;cpu_type&#125;, $&#123;linux_name&#125;"</span>)  <span class="comment"># x86, ubuntu</span></span><br><span class="line">  <span class="comment"># 和macro一样，也有那几个参数的控制</span></span><br><span class="line">  <span class="keyword">message</span>(<span class="string">"$&#123;ARGC&#125; &amp; $&#123;ARGV0&#125; &amp; $&#123;ARGN&#125; &amp; $&#123;ARGV&#125;"</span>)</span><br><span class="line">  <span class="comment"># 3 &amp; x86 &amp; a_unknown_parameter &amp; x86;ubuntu;a_unknown_parameter</span></span><br><span class="line"><span class="keyword">endfunction</span>(m_function)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>macro的官网说明：<a href="https://cmake.org/cmake/help/v3.0/command/macro.html" target="_blank" rel="noopener">https://cmake.org/cmake/help/v3.0/command/macro.html</a></p>
+<p>function的官网说明：<a href="https://cmake.org/cmake/help/v3.0/command/function.html" target="_blank" rel="noopener">https://cmake.org/cmake/help/v3.0/command/function.html</a></p>
+</blockquote>
+<p>根据官网的说法，在我们调用函数时，会首先将函数里定义的命令里的变量替换为我们传入的值，然后顺序执行所有的命令。</p>
+<p>当然，函数和宏还是有一定的区别的，从官网找到的差别大概是函数会打开一个新的命名作用域， 而宏的话则是一个纯粹的替换，和上下文使用的作用域是完全相同的。这也是和我们平常使用的宏和函数是可以类比的。应该还是可以理解的。</p>
+<p>这里有一篇文章讲的非常好，可以看一哈：<a href="https://juejin.im/post/5a8ab0e4f265da4e9d223972" target="_blank" rel="noopener">https://juejin.im/post/5a8ab0e4f265da4e9d223972</a></p>
+<h2 id="find-package函数"><a href="#find-package函数" class="headerlink" title="find_package函数"></a><code>find_package</code>函数</h2><blockquote>
+<p>这是一个感觉需要讲的东西，用来寻找依赖的库</p>
+</blockquote>
+<p>这个应用的场景通常是在我们需要自己指定依赖的第三方库时，比如我们需要依赖哪个公司提供给我们的一个so文件，我们会把这个so存放在我们的一个目录下（比如，<strong>openGL的libGL.so</strong>，在windows下叫做<strong>opengl.lib</strong>)，那么如何让我们的CMake程序找到这个依赖的so文件呢？这时候就要用到这个命令了。</p>
+<p>我们先来回顾一下之前是如何写依赖库的，我们使用的是<code>target_link_libraries()</code>命令。</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">add_executable</span>(demo		main.cpp lib.cpp) </span><br><span class="line"><span class="keyword">target_link_libraries</span>(demo  PRIVATE pthread)</span><br></pre></td></tr></table></figure>
+<p>这个pthread是系统库，不需要进行进一步的描述，如果不是系统自带的库的话，理所当然的，我们需要告诉CMake这个库所在的位置。比如使用libGL.so时，我们直接写</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">target_link_libraries</span>(demo  PRIVATE GL)</span><br></pre></td></tr></table></figure>
+<p>CMake十有八九是很懵逼的，什么GL，哪里来的GL？因此我们可以使用一个如下这样的命令告诉CMake这个库是什么，在哪里存放着。</p>
+<h3 id="find-libraries函数"><a href="#find-libraries函数" class="headerlink" title="find_libraries函数"></a><code>find_libraries</code>函数</h3><p>我们之前说过了一个很重要的概念叫<code>target</code>，我们可以编译出一个可执行文件或者一个库（lib或者so什么的）作为target。CMake也提供了一组函数，供我们导入现有的库作为CMake里的target。下面我们来举栗子：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line">find_libraries(lib_gl GL ../libs) <span class="comment"># 会去../libs目录下寻找名为libGL.so的文件，</span></span><br><span class="line">                                  <span class="comment"># 然后放在lib_gl这个变量里</span></span><br><span class="line"><span class="keyword">add_library</span>(opengl SHARED IMPORTED GLOBAL</span><br><span class="line">            IMPORTED_LOCATION <span class="variable">$&#123;lib_gl&#125;</span>) <span class="comment"># 表明是导入的库，会直接导入位置指定的文件作为目标</span></span><br></pre></td></tr></table></figure>
+<p>重点就是上面的哪个<code>IMPORTED</code>，表明是导入的库，无需编译构建。</p>
+<p>这样我们就可以使用opengl这个名字作为依赖库了，举个栗子尝一尝：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line">find_libraries(lib_gl GL ../libs)</span><br><span class="line"><span class="keyword">add_library</span>(opengl SHARED IMPORTED GLOBAL</span><br><span class="line">            IMPORTED_LOCATION <span class="variable">$&#123;lib_gl&#125;</span>)</span><br><span class="line"><span class="comment"># 然后就可以使用了</span></span><br><span class="line"><span class="keyword">target_link_libraries</span>(demo  PRIVATE opengl)</span><br></pre></td></tr></table></figure>
+<p>就可以顺畅的将这个添加到我们的工程里。</p>
+<h3 id="一种更通用的写法"><a href="#一种更通用的写法" class="headerlink" title="一种更通用的写法"></a>一种更通用的写法</h3><p>通用的写法就是使用<code>find_package</code>命令了。</p>
+<p>当我们使用的库比较多的时候，比如一个产品会提供好多个so文件，那么此时我们通常会使用一个类似命名空间的方法来控制，比如：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">target_link_libraries</span>(demo  PRIVATE opengl::GL)</span><br></pre></td></tr></table></figure>
+<p>即将Opengl这个大命名空间下的GL库作为依赖。</p>
+<blockquote>
+<p>随便怎么理解啦，理解为一个叫做<strong>“opengl::GL”</strong>的库大概也是可以的</p>
+</blockquote>
+<p><code>find_package(XXX ...)</code>命令会去一些目录里寻找一个命名为<strong>findXXX.cmake</strong>的脚本文件并运行它，我们通常会在这样的一个文件里写我们的寻找库文件的具体过程。</p>
+<blockquote>
+<p>这些目录被定义在<code>CMAKE_MODULE_PATH</code>里，我们可以自己编辑这个变量，添加我们自己的目录进去</p>
+</blockquote>
+<p>这个文件是可以完全由我们自己定义的，里边写什么都是很随意的了，CMake没有对这个做什么很严格的要求。但是通常来说，我们会定义以下的一些变量：</p>
+<ul>
+<li><code>XXX_FOUND</code>：表明包已经找到了，完全OK，在下文中可以正常使用；</li>
+<li><code>XXX_LIBRARIES</code>：一个列表，写明了所有导入的库在cmake中的名称；</li>
+<li><code>XXX::lib_name</code>：每个都是一个单独的库文件，比如我们上面提到的<code>opengl::GL</code>；</li>
+</ul>
+<p>还有一个常用的函数是：<code>FindPackageHandleStandardArgs</code>，方法如下：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line">FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [REQUIRED_VARS &lt;var1&gt;...&lt;varN&gt;])</span><br><span class="line"><span class="comment"># 举个栗子</span></span><br><span class="line">find_package_handle_standard_args(OPENGL REQUIRED_VARS lib_GL)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>当然这个方法的参数还有很多，请看官网链接：<a href="https://cmake.org/cmake/help/v3.0/module/FindPackageHandleStandardArgs.html" target="_blank" rel="noopener">https://cmake.org/cmake/help/v3.0/module/FindPackageHandleStandardArgs.html</a></p>
+</blockquote>
+<p>这个函数做了什么呢？其实就是验证和<code>lib_GL</code>放一起的这些变量有没有都找到，如果都找到的话，就会把<code>OPENGL_FOUND</code>设置为真，否则会报错表示缺少了一些需要的库。</p>
+<p>具体找包的过程和上述的<code>find_libraries</code>是一样的，也就不太赘述具体的过程了，直接给个栗子尝尝（请详细的看下注释）：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="comment"># findOPENGL.cmake</span></span><br><span class="line">find_libraries(lib_gl GL ../libs)</span><br><span class="line">find_package_handle_standard_args(OPENGL REQUIRED_VARS lib_GL)</span><br><span class="line"><span class="keyword">add_library</span>(OPENGL::GL SHARED IMPORTED GLOBAL</span><br><span class="line">            IMPORTED_LOCATION <span class="variable">$&#123;lib_gl&#125;</span>)</span><br></pre></td></tr></table></figure>
+<p>到了我们真正的<code>CMakeLists.txt</code>文件中，栗子如下：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="keyword">find_package</span>(OPENGL REQUIRED GLOBAL)</span><br><span class="line">...</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">NOT</span> OPENGL_FOUND)</span><br><span class="line">	...</span><br><span class="line"><span class="keyword">endif</span>()</span><br><span class="line">...</span><br><span class="line"><span class="keyword">target_link_libraries</span>(demo  PRIVATE opengl::GL)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>实际中，我们通常会在顶层文件中把所有依赖的包都找出来，会比较好统一管理</p>
+</blockquote>
+<h2 id="CMake常用变量"><a href="#CMake常用变量" class="headerlink" title="CMake常用变量"></a>CMake常用变量</h2><p>CMake内置了很多变量，比如我们上一节提到的<code>CMAKE_MODULE_PATH</code>就是一个，还有一些常用的，我们直接列下来：</p>
+<h3 id="全局编译选项"><a href="#全局编译选项" class="headerlink" title="全局编译选项"></a>全局编译选项</h3><ul>
+<li><strong>CMAKE_C_FLAGS</strong>：编译C程序时加入的编译器选项；</li>
+<li><strong>CMAKE_CXX_FLAGS</strong>：同理，编译C++程序时的编译选项；</li>
+</ul>
+<h3 id="工作目录信息"><a href="#工作目录信息" class="headerlink" title="工作目录信息"></a>工作目录信息</h3><ul>
+<li><strong>CMAKE_CURRENT_SOURCE_DIR</strong>：当前CMakeLists.txt所在的目录</li>
+<li><strong>EXECUTABLE_OUTPUT_PATH</strong>：输出可执行文件的目录</li>
+<li><strong>LIBRARY_OUTPUT_PATH</strong>：输出库文件的目录</li>
+<li><strong>CMAKE_CURRRENT_BINARY_DIR</strong>：当前正在编译的目标要输出的目录</li>
+</ul>
+<blockquote>
+<p>以上的这些变量通常都可以自己设置，比如可以自己指定可执行文件输出到哪里，自己指定要使用哪些全局的编译选项……</p>
+</blockquote>
+<h3 id="CMake版本"><a href="#CMake版本" class="headerlink" title="CMake版本"></a>CMake版本</h3><ul>
+<li><strong>CMAKE_MAJOR_VERSION</strong>，CMAKE 主版本号,比如 2.4.6 中的 2</li>
+<li><strong>CMAKE_MINOR_VERSION</strong>，CMAKE 次版本号,比如 2.4.6 中的 4</li>
+<li><strong>CMAKE_PATCH_VERSION</strong>，CMAKE 补丁等级,比如 2.4.6 中的 6</li>
+</ul>
+<h3 id="系统信息"><a href="#系统信息" class="headerlink" title="系统信息"></a>系统信息</h3><ul>
+<li><strong>CMAKE_SYSTEM</strong>，系统名称,比如 Linux-2.6.22</li>
+<li><strong>CMAKE_SYSTEM_NAME</strong>，不包含版本的系统名,比如 Linux</li>
+<li><strong>CMAKE_SYSTEM_VERSION</strong>，系统版本,比如 2.6.22</li>
+<li><strong>CMAKE_SYSTEM_PROCESSOR</strong>，处理器名称,比如 i686.</li>
+</ul>
+<h2 id="CMake常用方法"><a href="#CMake常用方法" class="headerlink" title="CMake常用方法"></a>CMake常用方法</h2><h3 id="message函数"><a href="#message函数" class="headerlink" title="message函数"></a><code>message</code>函数</h3><p>最常用的当然就是我们提过的<code>message</code>啦，不在此处赘述了</p>
+<h3 id="FILE函数"><a href="#FILE函数" class="headerlink" title="FILE函数"></a><code>FILE</code>函数</h3><p><code>file</code>方法可以对文件系统进行很多操作，比如读写，新建，重命名，哈希校验……具体的还是要看文档</p>
+<blockquote>
+<p><a href="https://cmake.org/cmake/help/v3.0/command/file.html?highlight=file" target="_blank" rel="noopener">https://cmake.org/cmake/help/v3.0/command/file.html?highlight=file</a></p>
+</blockquote>
+<p>有一个方法<code>GLOB</code>是我曾经踩过的坑，在这里提一嘴</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">file</span>(GLOB variable [RELATIVE path] [globbing expressions]...)</span><br></pre></td></tr></table></figure>
+<p>这里的<code>globbing expressions</code>和正则很像，但是真的不是正则，可以到维基上看一下什么叫<code>globbing</code>，千万不要简单的当作正则来用了。</p>
+<h3 id="INSTALL方法"><a href="#INSTALL方法" class="headerlink" title="INSTALL方法"></a><code>INSTALL</code>方法</h3><p>这个东西一说就很多了，但是也不是很难，大家直接看官网就好了</p>
+<h2 id="The-end-but-may-be-not-the-end"><a href="#The-end-but-may-be-not-the-end" class="headerlink" title="The end but may be not the end"></a>The end but may be not the end</h2><p>感觉想到的东西都已经说的差不多了，那就先到这里吧，想起来了会继续补充的，希望大家栗子吃的开心，也学到了一些CMake的小技能</p>
+]]></content>
+      <categories>
+        <category>CMake</category>
+      </categories>
+      <tags>
+        <tag>CMake</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>分布式互斥算法</title>
+    <url>/posts/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%92%E6%96%A5%E7%AE%97%E6%B3%95-2019-07-08/</url>
+    <content><![CDATA[<p>本文记录了三个分布式互斥算法，主要解决的是分布式系统中对临界区的访问控制</p>
+<ul>
+<li><strong>Lamport 算法</strong></li>
+<li><strong>Ricart-Agrawala 算法</strong></li>
+<li><strong>Singhal 算法</strong></li>
+</ul>
+<a id="more"></a>
+<h1 id="分布式互斥算法的基本"><a href="#分布式互斥算法的基本" class="headerlink" title="分布式互斥算法的基本"></a>分布式互斥算法的基本</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>要通过消息传递，来控制哪个进程可以访问临界区资源</p>
+<h2 id="性质"><a href="#性质" class="headerlink" title="性质"></a>性质</h2><ul>
+<li>安全性：不会造成多个进程同时在临界区执行</li>
+<li>活性：不会死锁，不会饿死</li>
+<li>公平性：排序基本达到FIFO，先到先进</li>
+</ul>
+<h1 id="Lamport-算法"><a href="#Lamport-算法" class="headerlink" title="Lamport 算法"></a>Lamport 算法</h1><blockquote>
+<p>最简单的算法，老爷子先占了个名字哈哈哈，老师上课吐槽这老爷子早期疯狂抢山头，用这么简单的算法混上了冠名</p>
+</blockquote>
+<p>请求临界区时：向所有其他进程发送 $REQUEST(t_i, i)$，将这个请求保存到本地请求队列里；</p>
+<p>如果收到了一个请求，那么按时间戳将请求加入到本地请求队列，然后返回一个 $REPLY(t_j)$，也是当前的时间戳；</p>
+<p>发送了请求以后进程就等啊等啊，直到</p>
+<ol>
+<li>收到了所有其他进程返回的 $REPLY(t<em>*)$，期望是对本地的 $t_i$进行相应，所以要求 $t</em>* &gt; t_i$，也就是说，是我发了消息后，对方才回复的消息；</li>
+<li>并且本地的 $t_i$ 在本地队列的队头</li>
+</ol>
+<p>那么就执行，可以进入临界区</p>
+<p>退出临界区时，从本地队列里删掉自己的请求，带着时间戳发一个广播，通知所有队列都可以删掉$i$ 请求了；</p>
+<p>很明显是要求<strong>FIFO</strong>通道的，想象一下连续发两个请求，如果非<strong>FIFO</strong>的话，返回值可能会乱序，</p>
+<p><img src="/posts/分布式互斥算法-2019-07-08/分布式互斥算法/1562502591896.png" alt="1562502591896"></p>
+<p>此时收到回复B，就将A送进去了，收到回复A时，发现B在对头，但是回复A的时间戳比B小，不给进入临界区，算法就卡死在这里了；</p>
+<h1 id="Ricart-Agrawala-算法"><a href="#Ricart-Agrawala-算法" class="headerlink" title="Ricart-Agrawala 算法"></a>Ricart-Agrawala 算法</h1><blockquote>
+<p>主要就是来优化上一个算法里的消息通信机制的</p>
+<p>上一个算法的冗余主要有：</p>
+<ol>
+<li><p>没有申请临界区资源的进程是没必要知道你是否进行了 $RELEASE$ 操作的；</p>
+<p>1.1 同样，早早的回复REPLY也是没用的，恢复了也进不去</p>
+<p>1.2 所有，不如等到RELEASE的时候再REPLY</p>
+</li>
+<li><p>同样，其实也是没必要知道你是否要申请临界区资源的，这和它没有任何关系；</p>
+</li>
+</ol>
+<p>这个算法就针对1进行了优化</p>
+</blockquote>
+<p>进入临界区没变化，还是要广播 $REQUEST(t_i, i)$；</p>
+<p>收到请求时：</p>
+<ul>
+<li>如果接收方发现自己没有请求临界区，也没有执行临界区，那就直接$REPLY$；</li>
+<li>如果接收方正在请求临界区，但是请求的时间戳比请求消息的时间戳的要大，也就说，比收到的请求消息申请的要晚，那也就直接 $REPLY$</li>
+<li>如果都不是，也就是说，接收方收到这个请求之后，发现自己需要比这个请求更早的进入临界区，那就先不回复它，而是记录本地的一个数组 $RD[i] = 1$，就是说，自己延迟了$p_i$进程的1个请求；</li>
+</ul>
+<p>同样，收到所有的 $REPLY$ 之后，才能进入临界区；</p>
+<p>退出临界区时，要按照 $RD$ 的记录，将延迟的 $REPLY$ 都发送出去；</p>
+<p>这个算法优化了什么呢？</p>
+<p>可以看出来，去掉了 $RELEASE$ 消息，$RELEASE$ 不需要发送了；</p>
+<p>为什么呢？根据我们前边的分析，将$RELEASE$发送给那些未申请临界区的进程是没有必要的，因此我们不想给他们发送，而申请临界区的进程就是给我们发送了$REQUEST$ 消息的进程。因此我们只需要给我们需要$REPLY$的那些进程发送$RELEASE$就可以了。</p>
+<p>继续分析一下，其实马上回复$REPLY$也是没必要的，反正回复了它也不能马上进行访问，不如等到它可以访问的时候再回复他（对请求方进程来说没差别，对吧）。</p>
+<p>基于这样的想法，我们把 $REPLY$ 延迟到释放资源时再发送。我们可以发现，但凡是我们发送 $REPLY$ 时，都没有在继续占用临界区资源了，也就是说，将这两个消息合并成了一个消息，减少了 1/3 的消息复杂度。</p>
+<h1 id="Singhal-自适应算法"><a href="#Singhal-自适应算法" class="headerlink" title="Singhal 自适应算法"></a>Singhal 自适应算法</h1><blockquote>
+<p>听名字就不一般，自适应算法，肯定是很牛了</p>
+<p>这个算法还是根据上面来继续优化的，我们上面分析到了冗余2，但是没有进行解决，这里就是来处理这个问题的</p>
+</blockquote>
+<p>算法的思路很精妙，一个经常请求临界区资源的进程其实是没必要获得那些不请求临界区资源的进程的同意的，给他们发 $REQUEST$ 消息也只是浪费带宽（还要收一下回复，真浪费啊）。</p>
+<p>所以我们把进程分为低频和高频的部分，按序排列，请求临界区时，只需要获得更高频率的进程的同意就可以了。</p>
+<p>思想很简单，但是漏洞蛮大的，肯定要在细节上处理很多小问题，我们继续看算法。</p>
+<p>定义如下的变量：</p>
+<ul>
+<li>请求集合$R<em>i$  ：进程𝑆</em>𝑖执行临界区之前，必须获得该集合中所有进程的许可</li>
+<li>通知集合$I<em>i$：进程𝑆</em>𝑖退出临界区之后，必须通知该集合中所有进程</li>
+<li>逻辑时钟$C_i$  ：每个进程维护一个Lamport时钟</li>
+<li>布尔变量<ul>
+<li>𝑅𝑒𝑞𝑢𝑒𝑠𝑡𝑖𝑛𝑔：当进程正在请求临界区时置为1</li>
+<li>𝐸𝑥𝑒𝑐𝑢𝑡𝑖𝑛𝑔 ：当进程正在执行临界区时置为1</li>
+<li>𝑀𝑦𝑝𝑟𝑖𝑜𝑟𝑖𝑡𝑦 ：若进程正在执行临界区的请求比当前申请进入临界区的请求具有更高的优先级，则置为1</li>
+</ul>
+</li>
+</ul>
+<p>请求时：</p>
+<ul>
+<li><p>先设置自己的 $Requesting = true$，正在请求；</p>
+</li>
+<li><p>然后逻辑时钟递增；</p>
+</li>
+<li>向 $R_i$ 发请求，并且等待所有的回复（收到回复时，将对方从R里删除，更新时钟）；</li>
+<li>请求完毕了（允许进入了），设置 $Requesting=false$；</li>
+</ul>
+<p>收到消息时：</p>
+<ul>
+<li>更新时钟（max）；</li>
+<li>如果当前正在请求临界区，那么根据优先级:<ul>
+<li>如果自己优先，就把对方加入到通知队列（$I_i$）里，等下通知他可以执行；</li>
+<li>如果对方更高，那就要先回复对方，然后把对方加入到自己的请求队列（$R_i$）里去，并且向人家补一个请求（之前没请求，所以要补）；</li>
+</ul>
+</li>
+<li>如果正在执行临界区，那就没办法了，把对方加入到通知队列里，等下通知；</li>
+<li>如果既不请求，也不执行，那么就放到请求队列里，然后马上回复对方；</li>
+</ul>
+<p>执行：</p>
+<ul>
+<li>设置 $Excuting = true$，正在执行；</li>
+<li>执行，然后设置为 $False$；</li>
+</ul>
+<p>释放临界区：</p>
+<ul>
+<li>对 $I_i$ 里的所有进程，发 $REPLY$ 消息；</li>
+<li>发完了就把这个加到 $R_i$ 里去；</li>
+</ul>
+<p>需要加入初始化来规避一些问题，我们初始化Ri只包含$P_{1..i-1}$，在动态调整的过程里，也要保证要么 $S_I \in R_j$ ，要么 $S_j \in R_i$；</p>
+]]></content>
+      <categories>
+        <category>分布式</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Raynal-Schiper-Toueg因果序保证算法</title>
+    <url>/posts/Raynal-Schiper-Toueg%E5%9B%A0%E6%9E%9C%E5%BA%8F%E4%BF%9D%E8%AF%81%E7%AE%97%E6%B3%95-2019-07-07/</url>
+    <content><![CDATA[<p>又是一篇没人写的算法，这门课没得参考就很尴尬</p>
+<p>是一种分布式环境下的因果序保证算法</p>
+<p>Pre: 消息通道，因果序</p>
+<a id="more"></a>
+<h2 id="因果序是什么"><a href="#因果序是什么" class="headerlink" title="因果序是什么"></a>因果序是什么</h2><p>一个消息通道保证因果序，意味着当两个消息的发送有依赖关系时，接收也要有依赖的关系，即：逻辑先发的一定会在逻辑上先收到。</p>
+<p>数学一点，是这样的：</p>
+<p>对任意两个发向同一进程的消息 $m<em>{ij}$ 和 $m</em>{kj}$  ，假设 $Send(m<em>{ij})\rightarrow Send(m</em>{kj})$ ，则 $Recv(m<em>{ij})\rightarrow Recv(m</em>{kj})$ ;</p>
+<p>也就是说，发送是有逻辑依赖的关系，在接收时也是按照逻辑依赖的顺序接收的。</p>
+<p>除了因果序，消息通道还有以下的顺序</p>
+<ul>
+<li><p>FIFO模型：信道运行为一个先进先出的队列模型</p>
+</li>
+<li><p>非FIFO模型：信道为一个集合，发送者向里面添加消息，接受者在里面移除消息，添加和移除是无序的</p>
+</li>
+</ul>
+<h2 id="因果序应用：三副本机制"><a href="#因果序应用：三副本机制" class="headerlink" title="因果序应用：三副本机制"></a>因果序应用：三副本机制</h2><p><img src="/posts/Raynal-Schiper-Toueg因果序保证算法-2019-07-07/Raynal-Schiper-Toueg因果序保证算法/1562480347865.png" alt="1562480347865"></p>
+<p>不再罗嗦了，课件非常清晰</p>
+<h2 id="保证因果序的基本思路"><a href="#保证因果序的基本思路" class="headerlink" title="保证因果序的基本思路"></a>保证因果序的基本思路</h2><p>基本思路很简单</p>
+<ul>
+<li>每条消息M都携带一条日志，保存了所有因果关系上在M之前的消息；</li>
+<li>M到达目的地是，先缓存自己，然后检查自己日志里的消息是否都到达了这个目的地（只检查目的地也是这里的就可以了）；</li>
+<li>如果满足这个要求，那么就可以把自己交付给这个目的进程了；否则要进入等待的状态；</li>
+</ul>
+<p>这里有一点小问题，如果记录因果上先于M的消息呢？</p>
+<p>很简单，如果<code>m2</code>依赖于<code>m1</code>，<code>m3</code>依赖于<code>m2</code>。那么<code>m2</code>携带的日志里有<code>m1</code>；而<code>m3</code>只需要复制<code>m2</code>的日志，再加入<code>m2</code>就可以了。</p>
+<p>也就是说，将所有已发送的消息沿着因果路径不断转发就可以了。</p>
+<h2 id="Raynal-Schiper-Toueg算法"><a href="#Raynal-Schiper-Toueg算法" class="headerlink" title="Raynal-Schiper-Toueg算法"></a>Raynal-Schiper-Toueg算法</h2><p></p><p style="color:red;font-weight:bold;"> 注意：这个算法要求FIFO通道 </p><p></p>
+<h3 id="算法思想"><a href="#算法思想" class="headerlink" title="算法思想"></a>算法思想</h3><p>基本思路是对我们上面所说的进行了简化，上面的描述中，记录了所有的消息，带来了很大的冗余。</p>
+<p>我们考虑在<strong>FIFO</strong>通道下。当<code>m2</code>收到时，<code>m1</code>一定也已经收到了。进一步思考，发送者要求这条消息依赖于之前的，<code>i-&gt;j</code>的10条消息，如果<code>j</code>进程发现自己当前已经收到了来自<code>i</code>的20条消息，那么可以肯定，要求的那10条消息肯定包含在我们已收到的20条消息里（<strong>FIFO</strong>的特性，<code>i-&gt;j</code>通道上不会出现乱序）。</p>
+<p>也就是说，我们只需要记录我们依赖的通道上的消息数量就可以了，这样就简化了传递的消息复杂度。</p>
+<h3 id="算法详述"><a href="#算法详述" class="headerlink" title="算法详述"></a>算法详述</h3><p>算法详细描述如下：</p>
+<p><img src="/posts/Raynal-Schiper-Toueg因果序保证算法-2019-07-07/Raynal-Schiper-Toueg因果序保证算法/1562481429579.png" alt="1562481429579"></p>
+<ul>
+<li><p><code>Send[j,k]</code>记录本进程所知的进程<code>j</code>发送到进程<code>k</code>的消息数量</p>
+</li>
+<li><p><code>DELIV[j]</code>记录由进程<code>j</code>发来的、已经<strong>Deliver</strong>到本进程的消息数</p>
+</li>
+</ul>
+<p><strong>发送消息时：</strong></p>
+<p><code>i-&gt;j</code>发送消息，表明所有依赖的消息是自己当前的<code>SENT</code>矩阵，附带在消息里发送，然后<code>SENT[i, j]++</code>；</p>
+<p><strong>接受消息时：</strong></p>
+<p><code>j-&gt;i</code>发送消息，接收到<code>j</code>的<code>ST</code>矩阵，就是当前消息的依赖，我们判断我们收到的消息数量（x是每个进程编号）</p>
+<script type="math/tex; mode=display">
+DELIV[x] \geq ST[x, i]</script><p>满足时，确认已收到了所有依赖的消息</p>
+<p>然后对<code>SENT</code>按位取<code>max</code>，自身和当前消息的依赖都要满足；</p>
+<p>然后<code>DELIV[j]++</code>，这是接收到的来自<code>j</code>的消息数量；</p>
+]]></content>
+      <categories>
+        <category>分布式计算</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>异步Floyd-Warshall算法</title>
+    <url>/posts/%E5%BC%82%E6%AD%A5Floyd-Warshall%E7%AE%97%E6%B3%95-2019-07-06/</url>
+    <content><![CDATA[<p>异步的Warshall算法找了半天没找到参考，自记一篇</p>
+<a id="more"></a>
+<h2 id="同步算法"><a href="#同步算法" class="headerlink" title="同步算法"></a>同步算法</h2><p>同步的<strong>Floyd-Warshall</strong>算法还是很简单的，算法过程如下</p>
+<p><img src="/posts/异步Floyd-Warshall算法-2019-07-06/异步Floyd-Warshall算法/1562403204556.png" alt="1562403204556"></p>
+<p>也很好理解，就是对于每条路径 (<code>s-&gt;t</code>)，寻找他们经过的最近的那个中间点（<code>pivot</code>），目标是找到一个<code>s-&gt;pivot-&gt;t</code>的路径比当前确定的<code>s-&gt;t</code>的路径还要近。所以就不停的测试，从<code>s</code>到<code>t</code>的路径变成<code>s-&gt;1-&gt;t</code>，<code>s-&gt;2-&gt;t</code>……会不会近一点……</p>
+<p>更深入来说，其实是一种动态规划的思想，先找到任意两个节点通过节点1的最短长度，然后再找通过节点2的最短长度=min{using 1, 2}</p>
+<p>可以去百度一下，同步算法的博客有很多，讲的比我详细的多，直接搜<code>floyd-warshall</code>就可以了</p>
+<h2 id="异步算法"><a href="#异步算法" class="headerlink" title="异步算法"></a>异步算法</h2><p>异步算法就比较奇怪了，首先我们使用同步算法的依据是<code>LENGTH</code>这个变量保存了所有的距离信息，也就是说，全局的距离信息都是已知的，然而到了异步版本，每个进程都只知道自己到各个节点的距离（标记为<code>LEN</code>，而且这个最近的一跳也要记下来，标记为<code>PARENT</code>），而不知道其他两个节点的距离，所以我们需要处理，让每个进程知道全部的消息。</p>
+<p>还是要按照同步算法的思想来处理，所以循环的最中心最重要的变量是<code>pivot</code>到各个节点的距离，所以我们可以将<code>pivot</code>节点的<code>LEN</code>信息对全网进行广播，所以其他节点就可以根据此个<code>pivot</code>的信息对自己的变量进行更新了。</p>
+<p><img src="/posts/异步Floyd-Warshall算法-2019-07-06/异步Floyd-Warshall算法/1562417540795.png" alt="1562417540795"></p>
+<p>草草的总结了一下，大致是这个意思的</p>
+<ul>
+<li><p>依次用每个节点作为中心点pivot</p>
+<ul>
+<li>对于每个邻居节点nbh<ul>
+<li>如果当前节点到pivot的最短路的下一跳是nbh，那么给nbh发送一个<code>intree(pivot)</code></li>
+<li>如果不是，那给nbh发送一个<code>notintree(pivot)</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>等待每个邻居节点nbh的<code>intree</code>和<code>notintree</code>消息</li>
+</ul>
+<hr>
+<ul>
+<li><p>如果当前节点和<code>pivot</code>已经找到了路径，那么</p>
+<ul>
+<li>如果pivot不是自己，就从到pivot的下一跳节点请求<code>PIVOT_ROW</code></li>
+<li>对每个nbh邻居节点<ul>
+<li>如果收到了nbh的<code>INTREE</code>消息<ul>
+<li>如果pivot是自己，给nbh发送自己的len</li>
+<li>如果不是，就发送自己存的<code>PIVOT_ROW</code>给nbh</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>当前就知道了自己到pivot的距离，pivot到其他节点的距离，可以更新路径</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="解释"><a href="#解释" class="headerlink" title="解释"></a>解释</h3><p>还是集中式的算法一样，用每个节点作为<code>pivot</code>进行考虑，程序开始时，所有节点都给自己的邻居节点发送<code>INTREE</code>和<code>NOTINTREE</code>消息，表明自己想要到达<code>pivot</code>节点，需要（或不需要）下一跳经过这个邻居节点。</p>
+<p>然后每个节点都进入了<code>await</code>状态，直到收到各自的所有邻居节点发来的消息。</p>
+<p>然后程序继续执行</p>
+<p>如果<code>LEN[pivot]</code>不是无穷，也就是当前节点已经找到了和<code>pivot</code>相连的一条路径</p>
+<blockquote>
+<p>如果没找到的话，那么说明当前节点和pivot不相连，也就没有更新路径的可能性了，在当前pivot阶段，程序可以结束了，等待下一次循环</p>
+</blockquote>
+<p>继续进行判断，如果<code>pivot</code>是自己，那么自己的<code>LEN</code>就是<code>pivot_row</code>这个变量。如果不是呢，那么就要想办法获取这个变量（<code>pivot</code>节点到各个节点的最短距离），所以从离<code>pivot</code>更近的一个节点进行寻找，也就是说从<code>Parent[pivot]</code>进行寻找，等待它给我们发送一个<code>pivot_row</code>的信息。这里又要进入<code>await</code>状态了，没有这个消息我们确实寸步难行。</p>
+<p>得到之后，我们遍历每个邻居节点nbh。如果收到了nbh的<code>intree</code>消息，那么说明我们当前节点是<code>nbh</code>到<code>pivot</code>节点的下一跳，也意味着我们要给它发送<code>pivot_row</code>消息（对照上一段），所以我们给他发<code>pivot_row</code>，同样，如果自己就是<code>pivot</code>，那就发自己的<code>len</code>就可以了，如果自己不是，那就发自己收到的<code>pivot_row</code>（上一段收到的）。</p>
+<p>这样操作结束后，当前节点通知了所有其他需要通知的节点<code>PIVOT_ROW</code>消息，所以理论上来说，让所有节点都收到<code>pivot_row</code>消息的操作已经圆满了（至少分配给自己节点的任务已经完成了），可能需要等一等，就可以让所有节点知道合理的<code>pivot_row</code>了。</p>
+<p>当然我们的当前节点没有必要等待，它可以直接进行下一步了，那就是更新自己的<code>LEN</code>变量（根据<code>pivot_row</code>和<code>len</code>，就相当于同步算法的<code>length[s, t]</code>和<code>length[pivot, ...]</code>）</p>
+<p>这样，就可以让所有节点生成一棵全源最短路的图了。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本质上来说，这个和集中式的算法没有区别，但是为了不同进程的同步，我们加入了很多处理同步的内容，需要耐心但不是特别难。</p>
+]]></content>
+      <categories>
+        <category>分布式</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Nova 源码学习笔记</title>
+    <url>/posts/Nova-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2019-06-26/</url>
+    <content><![CDATA[<p>How to study nova?</p>
+<p>U can follow me in this blog for the whole process.</p>
+<a id="more"></a>
+<p>[TOC]</p>
+<h1 id="前置要求"><a href="#前置要求" class="headerlink" title="前置要求"></a>前置要求</h1><ul>
+<li>安装Openstack</li>
+<li>下载Nova的源代码</li>
+</ul>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><p>主要的代码都在<code>nova</code>目录下</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nova</span><br><span class="line">├── api                     # API 服务</span><br><span class="line">├── availability_zones.py</span><br><span class="line">├── baserpc.py</span><br><span class="line">├── block_device.py</span><br><span class="line">├── cache_utils.py</span><br><span class="line">├── cmd</span><br><span class="line">├── common</span><br><span class="line">├── compute                 # 处理计算资源</span><br><span class="line">├── conductor</span><br><span class="line">├── conf</span><br><span class="line">├── config.py</span><br><span class="line">├── console</span><br><span class="line">├── consoleauth</span><br><span class="line">├── context.py</span><br><span class="line">├── crypto.py</span><br><span class="line">├── db</span><br><span class="line">├── debugger.py</span><br><span class="line">├── exception.py</span><br><span class="line">├── exception_wrapper.py</span><br><span class="line">├── filters.py</span><br><span class="line">├── hacking</span><br><span class="line">├── hooks.py</span><br><span class="line">├── i18n.py</span><br><span class="line">├── image</span><br><span class="line">├── __init__.py</span><br><span class="line">├── ipv6</span><br><span class="line">├── keymgr</span><br><span class="line">├── loadables.py</span><br><span class="line">├── locale</span><br><span class="line">├── manager.py</span><br><span class="line">├── monkey_patch.py</span><br><span class="line">├── network                     # nova网络的实现</span><br><span class="line">├── notifications</span><br><span class="line">├── objects</span><br><span class="line">├── pci</span><br><span class="line">├── policies</span><br><span class="line">├── policy.py</span><br><span class="line">├── privsep</span><br><span class="line">├── profiler.py</span><br><span class="line">├── quota.py</span><br><span class="line">├── rpc.py</span><br><span class="line">├── safe_utils.py</span><br><span class="line">├── scheduler                   # nova的调度任务</span><br><span class="line">├── service_auth.py</span><br><span class="line">├── servicegroup</span><br><span class="line">├── service.py                  # 所有服务的基类</span><br><span class="line">├── test.py</span><br><span class="line">├── tests</span><br><span class="line">├── utils.py</span><br><span class="line">├── version.py</span><br><span class="line">├── virt</span><br><span class="line">├── vnc</span><br><span class="line">├── volume</span><br><span class="line">├── weights.py</span><br><span class="line">└── wsgi.py</span><br></pre></td></tr></table></figure>
+]]></content>
+  </entry>
+  <entry>
+    <title>Nova cli 源码学习笔记</title>
+    <url>/posts/Nova-cli-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2019-06-26/</url>
+    <content><![CDATA[<p>最终目标： 为Nova开发一个小组件！</p>
+<p>记录自己摸索的过程啦，持续更新直到完成</p>
+<a id="more"></a>
+<p>先看看书，再看看github上Openstack的组织仓库，找到了两个仓库</p>
+<ul>
+<li><strong>Nova</strong>：<a href="https://github.com/openstack/nova" target="_blank" rel="noopener">https://github.com/openstack/nova</a>，Nova的大仓库，主要的功能实现应该都在这里了</li>
+<li><strong>Nova client</strong>：<a href="https://github.com/openstack/python-novaclient" target="_blank" rel="noopener">https://github.com/openstack/python-novaclient</a>，命令行 cli （应该主要是Nova命令）的客户端</li>
+</ul>
+<p>感觉应该是最重要的需要看的仓库了，可以看到调用命令行的过程，然后继续看看，还有一些可能会有用的仓库</p>
+<ul>
+<li><strong>Openstack client</strong>：<a href="https://github.com/openstack/python-openstackclient" target="_blank" rel="noopener">https://github.com/openstack/python-openstackclient</a>，命令行（Openstack命令）的客户端</li>
+<li><strong>Horizon</strong>：<a href="https://github.com/openstack/horizon" target="_blank" rel="noopener">https://github.com/openstack/horizon</a>，Horizon的实现里，想必也有不少的基于 Http 请求的Nova API的调用实例</li>
+</ul>
+<p>之前已经看过了Nova的代码了，感觉没有太多的涉及API的部分，直接去看Nova Client部分吧</p>
+<p>下载Nova client的代码，发现了 <code>doc</code>文件夹，打开以后发现和网站提供的文档是一致的， 就直接在网站上看了</p>
+<p><a href="https://docs.openstack.org/python-novaclient/latest/reference/api/index.html" target="_blank" rel="noopener">https://docs.openstack.org/python-novaclient/latest/reference/api/index.html</a></p>
+<p>网站上来就是代码了</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> novaclient <span class="keyword">import</span> client</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>nova = client.Client(VERSION, USERNAME, PASSWORD, PROJECT_ID, AUTH_URL)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>幸好有之前跟着官网一步一步配置的经验，不然看着这参数肯定一脸懵。</p>
+<p>想起来之前官网的配置教程给了一个 <code>admin-openrc</code> 的文件使用，每次调用 cli API 之前都要使用 <code>. admin-openrc</code> 激活一下。</p>
+</blockquote>
+<p>找到自己的虚拟机，打开<code>admin-openrc</code>看一下，发现给了不少的参数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">export OS_PROJECT_DOMAIN_NAME=Default</span><br><span class="line">export OS_USER_DOMAIN_NAME=Default</span><br><span class="line">export OS_PROJECT_NAME=admin</span><br><span class="line">export OS_USERNAME=admin</span><br><span class="line">export OS_PASSWORD=****</span><br><span class="line">export OS_AUTH_URL=http://controller:5000/v3</span><br><span class="line">export OS_IDENTITY_API_VERSION=3</span><br><span class="line">export OS_IMAGE_API_VERSION=2</span><br></pre></td></tr></table></figure>
+<p>激活环境变量，测试一下使用<code>nova flavor-list</code>，正常输出。</p>
+<p><img src="/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473441859.png" alt="1561473441859"></p>
+<p>把这些放到文档给的代码里试验一下，发现是不可以的，报错了，明显是我的权限验证有问题。</p>
+<p>从源代码开始分析一下，全文搜索<code>OS_PROJECT_</code>，5个文件中存在，除了<code>doc</code>和<code>test</code>中以外，就只剩下<code>shell.py</code>这个文件了，果然，这个文件从环境中读取了<code>OS_PROJECT_...</code>的变量。同时发现这个文件存在main函数，一定也是全程序的执行入口。从这个文件一路按图索骥，找到了熟悉的<code>client.Client()</code>调用，然后惊喜的发现，居然有两个<code>client</code>？？？还好注释写的明白，第一个声明只是为了确定version，第二个声明才是真正的声明。</p>
+<blockquote>
+<p>遇到了一个函数 importutils.import_class(…)，从根目录水平导入一个类，作为一个变量来使用，python真是博大精深啊……</p>
+<p>源码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&gt; <span class="keyword">return</span> version, importutils.import_class(</span><br><span class="line">&gt; ​        <span class="string">"novaclient.v%s.client.Client"</span> % version.ver_major)</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>&gt;</p>
+<blockquote>
+<p><strong>[Update]：</strong></p>
+<p>误会了，原来这是 Openstack 自己完成的一个函数，源码大致是这样操作的：</p>
+<p><code>getattr(sys.modules[mod_str], class_str)</code></p>
+<p>试验了一下，和<code>import</code>语句导入的模块无差，算是一种动态导入的方式了</p>
+</blockquote>
+<p>发现目录下只存在v2的子目录，因此看来是不存在使用 verison=2.x 这种操作了</p>
+<p>现在思考一下，还有一个问题悬而未决，是这个程序是如何监听的，思考了一番也没有找到，只有一行代码感觉是相关的</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">args.func(self.cs, args)</span><br></pre></td></tr></table></figure>
+<p>应该是自己给<code>args</code>加的属性，具体加了什么函数，还是不是很明确，应该是在这里执行的命令。</p>
+<p>猜测<code>nova</code>命令就是使用了<code>shell.py</code>的命令解析，所以试着直接运行 <code>shell.py</code>并加命令行参数，果然是可以的。</p>
+<p>然后再<code>shell.py</code>里简单的加了输出，没有问题；再然后在<code>Client</code>函数里加Log，发现没有输出，找了半天原因，发现是导入模块时，直接导入了已安装的包的模块，而不是当前目录下的模块，强行改造源代码，加入了输出的部分，一切正常了。</p>
+<p><img src="/posts/Nova-cli-源码学习笔记-2019-06-26/Nova-cli-源码学习笔记/1561473406323.png" alt="1561473406323"></p>
+<p>现在回头，从之前我们写的<code>flavor-list</code>这个命令开始进入程序分析</p>
+<p>我们全项目匹配<code>flavor list</code>类似的关键字，找到了一个函数，<code>do_flavor_list</code>，位于<code>novaclient-&gt;v2-&gt;shell.py</code>，尝试着加一下log，输出了，没有问题，我们跟着这个函数的调用继续研究。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">do_flavor_list</span><span class="params">(cs, args)</span>:</span></span><br><span class="line">    <span class="string">"""Print a list of available 'flavors' (sizes of servers)."""</span></span><br><span class="line">    <span class="keyword">if</span> args.all:</span><br><span class="line">        flavors = cs.flavors.list(...)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        flavors = cs.flavors.list(...)</span><br><span class="line">    _print_flavor_list(cs, flavors, args.extra_specs)</span><br></pre></td></tr></table></figure>
+<p>可以看到，关键函数是 <code>cs.flavor.list()</code>，我们去找一下<code>flavor</code>的定义（在<code>v2-&gt;client.py</code>)</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.flavors = flavors.FlavorManager(self)</span><br></pre></td></tr></table></figure>
+<p>继续去看<code>FlavorManager</code>，这里可以直接右键跳转了，发现<code>FlavorManager</code>的<code>list()</code>方法是处理了一些参数，然后转发给了<code>_list</code>这个方法。这个类里没有<code>_list</code>方法了，继续去基类找，一路找到<code>base.py</code>的<code>Manager</code>类，这个类有<code>_list</code>方法，获得重要参数的方法是：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if body:</span><br><span class="line">    resp, body = self.api.client.post(url, body=body)</span><br><span class="line">else:</span><br><span class="line">    resp, body = self.api.client.get(url)</span><br></pre></td></tr></table></figure>
+<p>看一下<code>api</code>的定义，发现要一路回到<code>self.flavors = flavors.FlavorManager(self)</code>，这个<code>api</code>就是<code>client</code>本身，找到<code>client</code>实例的<code>client</code>属性，发现是个<code>httpclient</code>对象，用<code>_construct_http_client</code>方法构造，具体的操作流程就是发送了一个请求给<code>/flavors</code>，然后获得返回值，一路返回，也就是这个<code>api</code>的操作流程了。</p>
+<p>基本上大部分的API都可以通过这样的流程找到对应的位置，在此也就不再赘述啦……</p>
+<p>下面该去看<code>Nova</code>的源码了，看一下这个服务端到底是如何建立起来的</p>
+]]></content>
+      <categories>
+        <category>Openstack</category>
+      </categories>
+      <tags>
+        <tag>Openstack</tag>
+        <tag>Nova</tag>
+        <tag>云</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Use sequelize ORM in Nodejs</title>
+    <url>/posts/Use-sequelize-ORM-in-Nodejs-2019-06-23/</url>
+    <content><![CDATA[<p>记录一下如何使用Sequelize框架，包括如何放在项目里进行组织，如何使用框架进行CRUD的操作</p>
+<a id="more"></a>
+<h2 id="开始之前"><a href="#开始之前" class="headerlink" title="开始之前"></a>开始之前</h2><h3 id="先讲讲我的开发配置"><a href="#先讲讲我的开发配置" class="headerlink" title="先讲讲我的开发配置"></a>先讲讲我的开发配置</h3><ul>
+<li><strong>语言</strong>：Nodejs</li>
+<li><strong>后端框架</strong>：KOA2</li>
+<li><strong>数据库：</strong> MySQL 5.6</li>
+</ul>
+<h3 id="选择一个ORM框架"><a href="#选择一个ORM框架" class="headerlink" title="选择一个ORM框架"></a>选择一个ORM框架</h3><p>如何选择是个大问题，百度了一些，大家推荐的基本是这四种</p>
+<ul>
+<li><p><strong>TypeORM</strong>：读了读代码，是用<strong>typescript</strong>写的，风格上和<strong>Java</strong>非常像，用注解什么的，感觉还不错，备选</p>
+</li>
+<li><p><strong>ORM2</strong>：看了几篇博客，好像有点小坑，还是算了</p>
+</li>
+<li><p><strong>Knex</strong>：推荐使用Bookshelf.js，支持Oracle，放弃了，毕竟已经确定了是用 KOA2 （类似express的风格了）</p>
+</li>
+<li><p><strong>Sequelize：</strong>这个应该是应用最广泛的了，看了看文档也很齐全，中文文档就有不下五六个版本，应该资源是不缺的，而且相比起其他的更像是javascript，就是他了！</p>
+</li>
+</ul>
+<p>基本大家都实现了<code>Promise</code>，所以基本都可以使用<code>async / await</code></p>
+<h2 id="Sequelize"><a href="#Sequelize" class="headerlink" title="Sequelize"></a>Sequelize</h2><h3 id="又是开始之前"><a href="#又是开始之前" class="headerlink" title="又是开始之前"></a>又是开始之前</h3><ul>
+<li><a href="https://github.com/demopark/sequelize-docs-Zh-CN" target="_blank" rel="noopener">一篇翻译的不错的中文文档：https://github.com/demopark/sequelize-docs-Zh-CN</a></li>
+<li><a href="http://docs.sequelizejs.com/identifiers" target="_blank" rel="noopener">官方给的详细的API参考：http://docs.sequelizejs.com/identifiers</a></li>
+</ul>
+<blockquote>
+<p>一定要善用后边这个文档，我是后期才使用这个文档，感觉前边吃了不少亏</p>
+</blockquote>
+<h3 id="Get-Started"><a href="#Get-Started" class="headerlink" title="Get Started"></a>Get Started</h3><h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install --save sequelize</span><br><span class="line">npm install --save mysql2 <span class="comment"># 可能要自己选择具体的数据库驱动，我们是MYSQL，就是这个了</span></span><br></pre></td></tr></table></figure>
+<h4 id="建立数据库连接"><a href="#建立数据库连接" class="headerlink" title="建立数据库连接"></a>建立数据库连接</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> Sequelize = <span class="built_in">require</span>(<span class="string">'sequelize'</span>);</span><br><span class="line"><span class="keyword">const</span> sequelize = <span class="keyword">new</span> Sequelize(<span class="string">'database'</span>, <span class="string">'username'</span>, <span class="string">'password'</span>, &#123;</span><br><span class="line">    host: <span class="string">'your ip address'</span>,</span><br><span class="line">    dialect: <span class="string">'mysql'</span>, <span class="comment">// Or mariadb, postgres, mssql ... </span></span><br><span class="line">    operatorsAliases: <span class="literal">false</span>,</span><br><span class="line">    dialectOptions: &#123;</span><br><span class="line">        <span class="comment">// 字符集</span></span><br><span class="line">        charset: <span class="string">"utf8mb4"</span>,</span><br><span class="line">        collate: <span class="string">"utf8mb4_unicode_ci"</span>,</span><br><span class="line">        supportBigNumbers: <span class="literal">true</span>,</span><br><span class="line">        bigNumberStrings: <span class="literal">true</span></span><br><span class="line">    &#125;,</span><br><span class="line">    pool: &#123;</span><br><span class="line">        max: <span class="number">5</span>,</span><br><span class="line">        min: <span class="number">0</span>,</span><br><span class="line">        acquire: <span class="number">30000</span>,</span><br><span class="line">        idle: <span class="number">10000</span></span><br><span class="line">    &#125;,</span><br><span class="line">    timezone: <span class="string">'+08:00'</span> <span class="comment">//东八时区</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    sequelize</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>可以使用 <code>.authenticate()</code> 函数来测试连接.</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">sequelize</span><br><span class="line">  .authenticate()</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'Connection has been established successfully.'</span>);</span><br><span class="line">  &#125;)</span><br><span class="line">  .catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.error(<span class="string">'Unable to connect to the database:'</span>, err);</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+<h4 id="建表和使用"><a href="#建表和使用" class="headerlink" title="建表和使用"></a>建表和使用</h4><p>说时迟那时快，马上就到了最重要的一步，建表。话不多说直接上代码。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// from task_table.js</span></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">sequelize, DataTypes</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> sequelize.define(<span class="string">'task'</span>,&#123;</span><br><span class="line">        task_id:&#123;</span><br><span class="line">            type:DataTypes.INTEGER,</span><br><span class="line">            primaryKey:<span class="literal">true</span>,</span><br><span class="line">            allowNull:<span class="literal">false</span>,</span><br><span class="line">            autoIncrement:<span class="literal">true</span></span><br><span class="line">        &#125;,</span><br><span class="line">        ......</span><br><span class="line">     );</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这就完成了一个表的模型的定义，到使用时，我们要在其他文件中 <code>require</code>这个文件，如下：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> TaskTable = sequelize.import(<span class="string">'task_table'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 用查询举例</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">searchTaskByID</span>(<span class="params">task_id</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">await</span> TaskTable.findByPk(task_id); <span class="comment">// find by primary key</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用时调用这个函数就可以返回根据<code>id</code>查询到的<code>task</code>对象了。</p>
+<p>这样，最简单的使用就完成了，具体的建表和表查询的API咱们等下继续讨论。</p>
+<h3 id="建表"><a href="#建表" class="headerlink" title="建表"></a>建表</h3><p>之前我们已经给出了建表的一段简单的代码，现在具体的看看还可以提供什么</p>
+<h4 id="freezeTableName"><a href="#freezeTableName" class="headerlink" title="freezeTableName"></a><code>freezeTableName</code></h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">return sequelize.define(&apos;user&apos;,&#123;</span><br><span class="line">    id: &#123; type:DataTypes.INTEGER&#125;,</span><br><span class="line">&#125;, &#123;</span><br><span class="line">    // 如果为 true 则表的名称和 model 相同，即 user</span><br><span class="line">    // 为 false MySQL创建的表名称会是复数 users</span><br><span class="line">    // 如果指定的表名称本就是复数形式则不变</span><br><span class="line">    freezeTableName: true</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如果为 true 则表的名称和 model 相同，即 user，为 false MySQL创建的表名称会是复数 users，如果指定的表名称本就是复数形式则不变</p>
+<h4 id="type"><a href="#type" class="headerlink" title="type"></a><code>type</code></h4><p><strong>详情请参考<a href="http://docs.sequelizejs.com/variable/index.html#static-variable-DataTypes" target="_blank" rel="noopener">API文档里关于DataTypes类的说明</a></strong></p>
+<p>包含了一些主要使用的数据类型，我们常用的有<code>Integer, Float, Char(), Text, Date ...</code>，例子可以看上边的定义</p>
+<h4 id="访问器和设置器"><a href="#访问器和设置器" class="headerlink" title="访问器和设置器"></a>访问器和设置器</h4><p>每个属性都可以设置 <code>get(), set()</code>函数，可以方便的获取一些格式化的值，比如对于时间的处理，由于不同的时间有不同的表示格式，我们可以在访问器这个级别来使用库来转换这个格式</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">updatedAt: &#123;</span><br><span class="line">    type: DataTypes.DATE,</span><br><span class="line">    <span class="keyword">get</span>() &#123;</span><br><span class="line">        <span class="keyword">return</span> moment(<span class="keyword">this</span>.getDataValue(<span class="string">'updatedAt'</span>)).format(<span class="string">'YYYY-MM-DD HH:mm:ss'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，我们拿出来的值就不是标准时间 <code>****T****Z</code>这种奇怪的格式，而是形如 <code>YYYY-MM-DD HH:mm:ss</code> 的时间了</p>
+<h4 id="外键约束"><a href="#外键约束" class="headerlink" title="外键约束"></a>外键约束</h4><p>使用 <code>reference</code> 可以指定外键，如下：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">team_id:&#123;</span><br><span class="line">    type:DataTypes.INTEGER,</span><br><span class="line">    allowNull:<span class="literal">false</span>,</span><br><span class="line">    references: &#123;</span><br><span class="line">        model: <span class="string">'team'</span>,</span><br><span class="line">        key: <span class="string">'team_id'</span>,</span><br><span class="line">        deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p><code>deferrable</code>是指定依赖的关系，比如添加时外部表没有该键如何处理，删除时是否要级联删除等……请查看<a href="http://docs.sequelizejs.com/variable/index.html#static-variable-Deferrable" target="_blank" rel="noopener">文档的详细介绍</a></p>
+<h4 id="列属性定义的一些其他参数"><a href="#列属性定义的一些其他参数" class="headerlink" title="列属性定义的一些其他参数"></a>列属性定义的一些其他参数</h4><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>可选取值</th>
+<th>解释</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>primaryKey</code></td>
+<td>` true</td>
+<td>false`</td>
+<td>主键</td>
+<td></td>
+</tr>
+<tr>
+<td><code>allowNull</code></td>
+<td>` true</td>
+<td>false`</td>
+<td>可以为空</td>
+<td></td>
+</tr>
+<tr>
+<td><code>autoIncrement</code></td>
+<td>`true</td>
+<td>false`</td>
+<td>自增属性</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><h4 id="从where开始"><a href="#从where开始" class="headerlink" title="从where开始"></a>从where开始</h4><p>Sequelize 提供了不少查询的API，可以直接使用，比如</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> task = <span class="keyword">await</span> Task.findAll(&#123;</span><br><span class="line">    where: &#123;</span><br><span class="line">        task_id: <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    attributes: [<span class="string">'task_id'</span>]</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure>
+<p>相当于<code>SELECT task_id FROM task WHERE task_id=1</code>，返回值是一个数组，里边包含了0个或多个 Sequelize 的 model 对象（也可以理解为查询结果转换为的Json对象）</p>
+<p>基本上使用就是通过 <code>where</code> 语句进行限定，如果想要使用<code>And | Or</code> ，可以使用官方提供的<code>Op</code>类，如下：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">await</span> Task.findAll(&#123;</span><br><span class="line">    where: &#123;</span><br><span class="line">        task_id: &#123;</span><br><span class="line">        	[Op.or]: [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    attributes: [<span class="string">'task_id'</span>]</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure>
+<p>我们回到这个返回值来看，这个对象还是和普通的Json不太一样，sequelize 为我们包装了不少东西，比如可以提供<code>get()</code>的访问。</p>
+<h4 id="关联查询"><a href="#关联查询" class="headerlink" title="关联查询"></a>关联查询</h4><p>感觉这是一个比较麻烦的地方，关键是资料还贼少，大概谢谢自己总结的一些地方</p>
+<p><a href="http://docs.sequelizejs.com/class/lib/associations/base.js~Association.html" target="_blank" rel="noopener">先上官方文档</a></p>
+<h5 id="建立关联"><a href="#建立关联" class="headerlink" title="建立关联"></a>建立关联</h5><p>关联要使用到几个关系，分别是<a href="http://docs.sequelizejs.com/class/lib/associations/belongs-to.js~BelongsTo.html" target="_blank" rel="noopener">BelongsTo</a>, <a href="http://docs.sequelizejs.com/class/lib/associations/belongs-to-many.js~BelongsToMany.html" target="_blank" rel="noopener">BelongsToMany</a>, <a href="http://docs.sequelizejs.com/class/lib/associations/has-many.js~HasMany.html" target="_blank" rel="noopener">HasMany</a>, <a href="http://docs.sequelizejs.com/class/lib/associations/has-one.js~HasOne.html" target="_blank" rel="noopener">HasOne</a></p>
+<p>其中 <code>BelongsTo</code>和<code>HasOne</code>对应于<strong>1：1的关联</strong></p>
+<p>而<code>HasMany</code>对应于<strong>1：m的关联</strong></p>
+<p>而<code>BelongsToMany</code>对应于<strong>n:m的关联</strong></p>
+<h6 id="1-1"><a href="#1-1" class="headerlink" title="1:1"></a>1:1</h6><p>我们可以预先定义这个关联</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">UserInfo.belongsTo(User, &#123;foreignKey: &apos;username&apos;&#125;)</span><br><span class="line">// 或 User.hasOne(UserInfo, &#123;foreignKey: &apos;username&apos;&#125;)</span><br></pre></td></tr></table></figure>
+<p>这两种写法都会给 <code>UserInfo</code> 加入一列，作为外键，指向 <code>User</code> 的<code>username</code> 上，当然如果需要这个添加反映到数据库上，需要使用 <code>Sequelize.sync()</code>才可以</p>
+<p>完成以上这一步之后，当你获得从 <code>findAll</code> 的API得到的 <code>UserInfo</code> 对象时，可以使用 <code>getUsers()</code> 这样的函数，来获取和他关联的 <code>user</code> 对象。</p>
+<h6 id="1-m"><a href="#1-m" class="headerlink" title="1:m"></a>1:m</h6><p>和上边差不多，只是换成了 <code>hasMany</code> 而已</p>
+<h6 id="m-n"><a href="#m-n" class="headerlink" title="m:n"></a>m:n</h6><p>这个是面向多对多的关联的，比如用户加入小组，需要在用户和小组之间建立一个联系，大概像这样：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">| id | username | team_id | ... |</span><br><span class="line">| 0  | user1    | 1       | ... |</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>我们可以使用 <code>BelongsToMany</code> 这个关联，需要提供一个<code>through</code>的表，比如：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">Team.belongsToMany(User, &#123;<span class="attr">through</span>: Members, <span class="attr">foreignKey</span>: <span class="string">'team_id'</span>, <span class="attr">target_key</span>: <span class="string">'username'</span>&#125;)</span><br></pre></td></tr></table></figure>
+<p>需要预先定义一个 <code>Members</code> 的 <code>Model</code>，可以不写东西，会自动添加两边的主键进去，也可以自己先定义一些其他的需要的列，比如状态什么的。</p>
+<h5 id="使用关联进行查询"><a href="#使用关联进行查询" class="headerlink" title="使用关联进行查询"></a>使用关联进行查询</h5><p>查询时需要使用的是<code>include</code>方法，如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Task.belongsTo(User)</span><br><span class="line">return await Task.findAll(&#123;</span><br><span class="line">    where: &#123; ... &#125;,</span><br><span class="line">    include: [&#123;</span><br><span class="line">        model: User</span><br><span class="line">    &#125;]</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>相当于先在关联的外键上做一个<code>Join</code> ，然后进行查询。可以看到 <code>include</code> 提供的是一个数组，所以是可以提供多个表级联的查询的。</p>
+<p>可能每次在前边写 <code>belongsTo</code> 感觉比较奇怪，一种可选的写法是：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">return await Task.findAll(&#123;</span><br><span class="line">    where: &#123; ... &#125;,</span><br><span class="line">    include: [&#123;</span><br><span class="line">        association: Task.belongsTo(User)</span><br><span class="line">    &#125;]</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>也是差不多的</p>
+<h3 id="Update、Delete、Create"><a href="#Update、Delete、Create" class="headerlink" title="Update、Delete、Create"></a>Update、Delete、Create</h3><p>这三个就直接一起讲了，没太大区别</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">models.TR.create(&#123;</span><br><span class="line">    username: username,</span><br><span class="line">    task_id: task_id,</span><br><span class="line">    state: models.status_code.tr.WAITING_TO_BE_DONE</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">models.Task.update(&#123;</span><br><span class="line">    state: models.status_code.task.ACCEPETED_AND_DOING</span><br><span class="line">&#125;, &#123;</span><br><span class="line">    where: &#123;</span><br><span class="line">        task_id: task_id</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line">            </span><br><span class="line">TR.destroy(&#123;</span><br><span class="line">	where: &#123;</span><br><span class="line">		task_id: task_id</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>具体参数写了什么不需要管，反正大概就是这个意思啦，要注意删除用的是 <code>destroy</code> </p>
+<h3 id="sql-聚合函数"><a href="#sql-聚合函数" class="headerlink" title="sql 聚合函数"></a>sql 聚合函数</h3><p>聚合函数是指 <code>count</code> 啊什么的，比如：</p>
+<p><code>[[sequelize.fn(&#39;COUNT&#39;, sequelize.col(&#39;hats&#39;)), &#39;no_hats&#39;]]</code>，调用了<code>count</code>函数，对<code>hats</code> 列进行计数，并将结果存为<code>no_hats</code>，我们可以在<code>include</code>或<code>findAll</code>的参数里直接使用这个。</p>
+<h3 id="使用原始SQL语句"><a href="#使用原始SQL语句" class="headerlink" title="使用原始SQL语句"></a>使用原始SQL语句</h3><p>到现在肯定有同学发现了，还是不灵活，有不少操作很难完成，幸好我们可以直接使用 sql 语句进行查询，如下：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">await</span> sequelize.query(</span><br><span class="line">    <span class="string">"SELECT * FROM `task` where `task_id` NOT IN (SELECT `task_id` FROM `teamtask`) AND `publisher` = \'"</span> + org_name + <span class="string">"\'"</span>, </span><br><span class="line">    &#123; <span class="attr">type</span>: sequelize.QueryTypes.SELECT&#125;</span><br><span class="line">    ).then(<span class="function"><span class="params">result</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<p>这里当然是可以进行参数绑定的，我就直接裸加了，如果需要参数绑定请自行百度一下吧哈哈（当然这个语句还是可以用两个<code>awiat</code>完成的，我没什么例子了随便写写啦）</p>
+<h3 id="一些小tips"><a href="#一些小tips" class="headerlink" title="一些小tips"></a>一些小tips</h3><p>一是使用redis进行缓存，这个可以单独去搞，也就不在这里赘述了。</p>
+<p>除此以外，我们可以尝试着让一些查询尽可能的并行化</p>
+<h4 id="Promise-all"><a href="#Promise-all" class="headerlink" title="Promise.all"></a>Promise.all</h4><p>这里要提到一个工具：<code>Promise.all([])</code>，举例如下：</p>
+<p>我们接受任务后需要对任务的状态进行修改，即这样的需求：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">await</span> models.TR.create(...);</span><br><span class="line"><span class="keyword">await</span> models.Task.update(...);</span><br></pre></td></tr></table></figure>
+<p>这就是2个<code>await</code>语句，我们可以把这个包装一下：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> result = <span class="keyword">await</span> <span class="built_in">Promise</span>.all([</span><br><span class="line">    models.TR.create(...),</span><br><span class="line">    models.Task.update(...)</span><br><span class="line">])</span><br></pre></td></tr></table></figure>
+<p>相当于把两个串行改成了并行的，还是可以省不少时间的，特别是访问多了以后</p>
+<p>要注意每个异步语句都是会立即返回一个<code>promise</code>对象的，因此我们可以用循环运行所有的这些操作，并将返回值存储起来，然后放到<code>Promise.all()</code>的参数中，等待其完成</p>
+<h4 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h4><p>把所有的时间打包作为一个事务提交，理论上应该免去了网络的时延啊，虽然我没有用，但是应该是一个很好的选择。</p>
+<h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><p>我们项目使用的目录结构大致如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">root</span><br><span class="line">├─......</span><br><span class="line">├─controllers</span><br><span class="line">├─models</span><br><span class="line">└─tables</span><br></pre></td></tr></table></figure>
+<ul>
+<li>controllers负责处理router模块处理的URL后分发的请求，对参数进行分析，处理主要的业务逻辑部分；</li>
+<li>models负责与数据库进行交互，使用我们上面提到的这一堆API进行实现；</li>
+<li>tables负责建表的语句；</li>
+</ul>
+<p>以上三个文件夹有明显的分层，存在由上到下的调用的依赖，同级之间尽量不发生依赖关系，也不会出现依赖上级代码的情况。如果可以的话，我也推荐在每个文件夹写一个总的导出的文件，到上一层时，使用这个文件进行导入，而不是导入每个下层文件夹里所有的文件，这样也可以保证所有的建表语句会在开始时运行，而不会出现最后发现有个表没有用到的情况。</p>
+]]></content>
+      <categories>
+        <category>后端</category>
+      </categories>
+      <tags>
+        <tag>sequelize</tag>
+        <tag>nodejs</tag>
+        <tag>ORM</tag>
+        <tag>后端</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Rasterization-Bresenham, scan line method</title>
+    <url>/posts/Rasterization-Bresenham,%20scan%20line%20method-2019-03-20/</url>
+    <content><![CDATA[<p>光栅化算法，主要是：</p>
+<ul>
+<li><strong>DDA</strong> 画直线算法；</li>
+<li><strong>Bresenham</strong> 快速画直线算法；</li>
+<li><strong>Bresenham</strong> 画圆算法；</li>
+<li><strong>Edge Equation</strong> 三角形填充算法；</li>
+</ul>
+<a id="more"></a>
+<h2 id="实现结果"><a href="#实现结果" class="headerlink" title="实现结果"></a>实现结果</h2><p>先看效果啦，分别是使用<strong>Bresenham</strong>算法画直线、圆、并使用<strong>Edge Equation</strong>算法填充三角形的效果</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/CG-HW3.gif" alt="CG-HW3"></p>
+<h2 id="DDA"><a href="#DDA" class="headerlink" title="DDA"></a>DDA</h2><p>想了想还是先提一句DDA吧，这个也是经典了</p>
+<p>DDA就是简单的数值微分然后拟合的算法，它的原型大致过程如下：</p>
+<ol>
+<li>给两个点 $(x_1, y_1)，(x_2, y_2)$</li>
+<li>可以得到一个直线的表达式 $y=mx+b$</li>
+<li>每次推进一个$x$，即每次 $x=x+1$，然后计算 $y=mx+b$ 的值，每次要进行取整；</li>
+</ol>
+<p>如果 $m&gt;1$，那么可以选择每次将 $y$ 推进1格。</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/1553049632903.png" width="70%/"></p>
+<p>通常来说，DDA对上述过程做了一定的优化，每次不需要都计算 $y=mx+b$ 了，而是选择如下的公式计算：</p>
+<script type="math/tex; mode=display">
+x_{k+1}=x_k+1；\\
+y_{k+1}=y_k+m；</script><p>到了 $m&gt;1$ 时就换成 $x_{k+1}=x_k+\frac{1}{m}$ 就好了，计算出结果以后取整作为像素点的坐标值。</p>
+<p>看起来好了很多，但是还是要涉及到浮点数的运算，还有不少的取整操作，对于计算机来说实在是有点困难（因为会算的很多，浮点总是要慢一些的，还会涉及到一定的舍入误差累计）。</p>
+<h2 id="Bresenham算法"><a href="#Bresenham算法" class="headerlink" title="Bresenham算法"></a>Bresenham算法</h2><p>感谢Bresenham老爷子提出的这个Bresenham算法，现在这基本上是所有直线算法的标准了，一般都会直接集成到硬件里。</p>
+<h3 id="Bresenham-直线算法原理"><a href="#Bresenham-直线算法原理" class="headerlink" title="Bresenham 直线算法原理"></a>Bresenham 直线算法原理</h3><p>先上一张图</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/bresenhams_line_generation.jpg" alt="Bresenhamâs Line Generation"></p>
+<p>可以看出来，每次选下一个点都是在 $(x_k+1, y_k+1)$ 和 $(x_k + 1, y_k)$ 之间选取，到底选哪个要看直线到底在这个x坐标下，离哪个更近一些。</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/dupper_and_dlower.jpg" alt="dupper and dlower"></p>
+<p>我们把上下的距离分别标注为 $ d<em>{upper} $ 和 $d</em>{lower}$ ，当下边比较大的时候，就要选取上边的点，所以我们让他们相减，代入直线公式可以得到</p>
+<script type="math/tex; mode=display">
+d_{lower} - d_{upper} = 2m(x_i + 1) - 2\overline{y_i} + 2B - 1</script><p>我们已经知道了 $\Delta x = x<em>{end} - x</em>{start} $ 是一个正值，所以我们可以把这个乘到上式，不会影响正负。</p>
+<script type="math/tex; mode=display">
+p_i = 2\Delta y \cdot x_i - 2\Delta x\cdot \overline{y_i} + c</script><blockquote>
+<p>这里 $\Delta x= x<em>{end} - x</em>{start}， \Delta y = y<em>{end} - y</em>{start}，m=\Delta y/ \Delta x$</p>
+<p>​        $c=(2B-1)\Delta x + 2 \Delta y$；</p>
+</blockquote>
+<p>然后我们可以代入算出来</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mathrm { p } _ { 0 } &= 2 \Delta \mathrm { y } \bullet x _ { 0 } - 2 \mathrm { x } \bullet \overline { y } _ { 0 } + ( 2 B - 1 ) \Delta x + 2 \Delta y \\
+&= 2 \Delta y \bullet x _ { 0 } - 2 \left( \Delta y \bullet x _ { 0 } + B \bullet \Delta x \right) + ( 2 B - 1 ) \Delta x + 2 \Delta y \\
+&= 2 \Delta y - \Delta x
+\end{align}</script><p>第二步代入了直线方程</p>
+<blockquote>
+<ul>
+<li><p>要注意这个公式只有 $p_0​$ 可以这样推导出来，因为 $\overline {y_0} = mx_0 + B​$，而其他的 $y_i​$ 就不能这么简单的算出来了。</p>
+</li>
+<li><p>$\overline{y_i}$ 就是在 $i$ 这个点处，光栅化以后的纵坐标的值</p>
+</li>
+</ul>
+</blockquote>
+<p>还可以进一步的化简</p>
+<script type="math/tex; mode=display">
+\begin{aligned} p_{i+1} - p_{i} & = \left( 2 \Delta y \bullet x _ { i + 1 } - 2 \Delta x \cdot \overline { y } _ { i + 1 } + c \right) - \left( 2 \Delta y \bullet x _ { i } - 2 \Delta x \bullet \overline { y } _ { i } + c \right) \\ & = 2 \Delta y - 2 \Delta x \left( \overline { y } _ { i + 1 } - \overline { y } _ { i } \right) \end{aligned}</script><ul>
+<li><p>这里如果 $p<em>i \leq 0$，那么 $\overline {y</em>{i+1}} - \overline{y<em>i} = 0$，那么 $p</em>{i+1} = p_{i} + 2 \Delta y$；</p>
+</li>
+<li><p>这里如果 $p<em>i  &gt; 0$，那么 $\overline {y</em>{i+1}} - \overline{y<em>i} = 1$，那么 $p</em>{i+1} = p_{i} + 2 \Delta y - 2 \Delta x$；</p>
+</li>
+</ul>
+<p>简直是神器啊，得到这个以后就可以开始计算了，全是整数，不浮点不取整不舍入，还是拟合效果最棒的，贴一张图看个例子：</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/1553051527691.png" alt="1553051527691"></p>
+<h3 id="Bresenham-直线算法实现"><a href="#Bresenham-直线算法实现" class="headerlink" title="Bresenham 直线算法实现"></a>Bresenham 直线算法实现</h3><hr>
+<p>这里使用了几个标志量：<code>flipY</code>和<code>flipXY</code>，表示我们我们对输入数据做的不同的预处理，目的都是把输入的直线转换为一个简单的形式，可以直接应用<code>x=x+1, y=...</code>这样的规则。</p>
+<p>其中：</p>
+<ul>
+<li><p>首先判断起始点的<code>x</code>坐标要在终点的<code>x</code>坐标前，如果不符合，则交换两个点的坐标；</p>
+</li>
+<li><p><code>flipY</code>：应用的情况如下图</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham,%20scan%20line%20method/1553527565953.png" alt="1553527565953"></p>
+<p>目的是将左上到右下的直线转换为左下到右上，就可以使用我们讨论的方法了；</p>
+</li>
+<li><p><code>flipXY</code>：应用的情况如下图：</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham,%20scan%20line%20method/1553533040001.png" alt="1553533040001"></p>
+<p>此时将纵坐标跨度较长的直线转换为了横坐标跨度较长的直线，也就可以应用我们讨论的办法了；</p>
+</li>
+</ul>
+<p>流程结束后，将得到的直线坐标根据这两个<strong>flag</strong>进行变换，得到真正的坐标。</p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><hr>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 生成线</span></span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">float</span>&gt; genLinePoints(Point from, Point to) &#123;</span><br><span class="line">	Points points;</span><br><span class="line">	<span class="keyword">bool</span> flipY = <span class="literal">false</span>, flipXY = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> dx = <span class="built_in">abs</span>(to.x - from.x);</span><br><span class="line">	<span class="keyword">int</span> dy = <span class="built_in">abs</span>(to.y - from.y);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (from.x &gt; to.x) &#123;</span><br><span class="line">		swap2(from, to);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (from.y &gt; to.y) &#123;</span><br><span class="line">		flipY = <span class="literal">true</span>;</span><br><span class="line">		from.y = -from.y;</span><br><span class="line">		to.y = -to.y;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (dy &gt; dx) &#123;</span><br><span class="line">		flipXY = <span class="literal">true</span>;</span><br><span class="line">		swap2(from.x, from.y);</span><br><span class="line">		swap2(to.x, to.y);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	dx = to.x - from.x;</span><br><span class="line">	dy = to.y - from.y;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%d, %d\n"</span>, dx, dy);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 意味着要使用 x 作为 +1 更新的坐标</span></span><br><span class="line">	<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; p(dx, <span class="number">2</span> * dy - dx);</span><br><span class="line">	points.push_back(from);</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; dx; i++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (p[i - <span class="number">1</span>] &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">			p[i] = p[i - <span class="number">1</span>] + <span class="number">2</span> * dy;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			p[i] = p[i - <span class="number">1</span>] + <span class="number">2</span> * dy - <span class="number">2</span> * dx;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (p[i] &gt; <span class="number">0</span>) &#123;</span><br><span class="line">			points.push_back(Point(from.x + i, points[i - <span class="number">1</span>].y + <span class="number">1</span>));</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			points.push_back(Point(from.x + i, points[i - <span class="number">1</span>].y));</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	points.push_back(to);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (flipXY) &#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; points.size(); i++) &#123;</span><br><span class="line">			swap2(points[i].x, points[i].y);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (flipY) &#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; points.size(); i++) &#123;</span><br><span class="line">			points[i].y = -points[i].y;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> pointsToFloat3(points);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Bresenham-算法绘制三角形"><a href="#Bresenham-算法绘制三角形" class="headerlink" title="Bresenham 算法绘制三角形"></a>Bresenham 算法绘制三角形</h2><p>就是使用 <strong>Bresenham</strong> 算法画三条线，结果如下：</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/1553569698090.png" alt="1553569698090"></p>
+<h2 id="Bresenham-算法画圆"><a href="#Bresenham-算法画圆" class="headerlink" title="Bresenham 算法画圆"></a>Bresenham 算法画圆</h2><h3 id="算法原理概述"><a href="#算法原理概述" class="headerlink" title="算法原理概述"></a>算法原理概述</h3><p>画圆和画直线的思路差不多，具体可以看<a href="https://en.wikipedia.org/wiki/Midpoint_circle_algorithm" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Midpoint_circle_algorithm</a></p>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Bresenham_circle.svg" alt></p>
+<p>同时要注意只需要画1/8圆就可以了，其他的部分可以对称过去。</p>
+<p>起始的 $d = 3 - (2 * r)$，每次 $x = x + 1$，计算 $d$ 而得到 $y$ 坐标的值。</p>
+<p>算法流程如下：<br><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/20100827164643_T2cBv.png" alt></p>
+<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 生成圆</span></span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">float</span>&gt; genCirclePositions(Point centre, <span class="keyword">int</span> radius) &#123;</span><br><span class="line">	<span class="built_in">vector</span>&lt;Point&gt; pv;</span><br><span class="line">	<span class="keyword">int</span> x = <span class="number">0</span>, y = radius, d = <span class="number">3</span> - (<span class="number">2</span> * radius);</span><br><span class="line">	<span class="keyword">auto</span> eightPoints = circle8(centre, x, y);</span><br><span class="line">	pv.insert(pv.end(), eightPoints.begin(), eightPoints.end());</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">while</span> (x &lt; y) &#123;</span><br><span class="line">		<span class="keyword">if</span> (d &lt; <span class="number">0</span>) &#123;</span><br><span class="line">			d = d + <span class="number">4</span> * x + <span class="number">6</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			d = d + <span class="number">4</span> * (x - y) + <span class="number">10</span>;</span><br><span class="line">			y--;</span><br><span class="line">		&#125;</span><br><span class="line">		x++;</span><br><span class="line">		<span class="keyword">auto</span> eightPoints = circle8(centre, x, y);</span><br><span class="line">		pv.insert(pv.end(), eightPoints.begin(), eightPoints.end());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">auto</span> data = pointsToFloat3(pv);</span><br><span class="line">	<span class="keyword">return</span> data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/1553569715183.png" alt="1553569715183"></p>
+<h2 id="Edge-Equation-三角形填充算法"><a href="#Edge-Equation-三角形填充算法" class="headerlink" title="Edge Equation 三角形填充算法"></a>Edge Equation 三角形填充算法</h2><h3 id="Edge-Equation-算法原理概述"><a href="#Edge-Equation-算法原理概述" class="headerlink" title="Edge Equation 算法原理概述"></a>Edge Equation 算法原理概述</h3><p>三角形的填充使用<strong>Edge Equation</strong>算法，具体实现流程如下：</p>
+<ol>
+<li><p>计算得到一个矩形框，如下图黄色部分，将三角形全部包括进去；</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/1553532588083.png" alt="1553532588083"></p>
+</li>
+<li><p>对矩形框内每个点进行计算，判断其是否在三角形的内部，如果在内部则进行渲染，否则不进行渲染；</p>
+<p>这一步使用的是简单的直线方程进行计算，首先我们可以得到两点的直线方程为：</p>
+<script type="math/tex; mode=display">
+(y_1 - y_2)x+(x_2 - x_1)y+x_1 y_2 - x_2 y_1 = 0</script><p>对每个点应用该公式，判断其正负性，则可以判断是否在三角形内部；</p>
+<blockquote>
+<p>具体使用时可能难以判断其正负性那个是在内部，可以使用第三个点辅助判断，与第三个点带入方程的符号相一致的是在三角内部的点，否则是在三角外部的点；</p>
+</blockquote>
+</li>
+</ol>
+<p>伪代码如下：</p>
+<p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/1553532970086.png" alt="1553532970086"></p>
+<h3 id="Edge-Equation算法实现"><a href="#Edge-Equation算法实现" class="headerlink" title="Edge Equation算法实现"></a>Edge Equation算法实现</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::function&lt;<span class="keyword">bool</span>(<span class="keyword">int</span> x, <span class="keyword">int</span> y)&gt; genLineEquation(Point p1, Point p2, Point p3) &#123;</span><br><span class="line">	<span class="keyword">return</span> [=](<span class="keyword">int</span> x, <span class="keyword">int</span> y) -&gt; <span class="keyword">bool</span> &#123;</span><br><span class="line">		<span class="keyword">auto</span> lf = [&amp;](<span class="keyword">int</span> x, <span class="keyword">int</span> y) &#123;</span><br><span class="line">			<span class="keyword">return</span> (p1.y - p2.y) * x + (p2.x - p1.x) * y + (p1.x * p2.y - p2.x * p1.y);</span><br><span class="line">		&#125;;</span><br><span class="line">		<span class="keyword">if</span> (lf(p3.x, p3.y) &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> lf(x, y) &gt;= <span class="number">0</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> lf(x, y) &lt;= <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 生成三角形，通过Edge Eqution算法</span></span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">float</span>&gt; genFilledTriPoints(Point p1, Point p2, Point p3) &#123;</span><br><span class="line">	<span class="built_in">vector</span>&lt;Point&gt; points;</span><br><span class="line">	<span class="keyword">int</span> maxx = max(p1.x, p2.x, p3.x),</span><br><span class="line">		maxy = max(p1.y, p2.y, p3.y),</span><br><span class="line">		minx = min(p1.x, p2.x, p3.x),</span><br><span class="line">		miny = min(p1.y, p2.y, p3.y);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">auto</span> l1f = genLineEquation(p2, p1, p3);</span><br><span class="line">	<span class="keyword">auto</span> l2f = genLineEquation(p3, p2, p1);</span><br><span class="line">	<span class="keyword">auto</span> l3f = genLineEquation(p3, p1, p2);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = minx; i &lt; maxx; i++) &#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> j = miny; j &lt; maxy; j++) &#123;</span><br><span class="line">			<span class="keyword">bool</span> inside = l1f(i, j) &amp;&amp; l2f(i, j) &amp;&amp; l3f(i, j);</span><br><span class="line">			<span class="keyword">if</span> (inside) &#123;</span><br><span class="line">				points.push_back(Point(i, j));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> pointsToFloat3(points);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="实验结果-1"><a href="#实验结果-1" class="headerlink" title="实验结果"></a>实验结果</h3><p><img src="/posts/Rasterization-Bresenham, scan line method-2019-03-20/Rasterization-Bresenham, scan line method/1553569726468.png" alt="1553569726468"></p>
+]]></content>
+      <categories>
+        <category>CG</category>
+      </categories>
+      <tags>
+        <tag>Algorithm</tag>
+        <tag>CG</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>系统分析与设计作业1</title>
+    <url>/posts/%E7%B3%BB%E7%BB%9F%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%E4%BD%9C%E4%B8%9A1-2019-03-12/</url>
+    <content><![CDATA[<p>系统分析与设计的第一次作业</p>
+<a id="more"></a>
+<h4 id="系统分析与设计"><a href="#系统分析与设计" class="headerlink" title="系统分析与设计"></a>系统分析与设计</h4><h2 id="作业-1"><a href="#作业-1" class="headerlink" title="作业 1"></a>作业 1</h2><h3 id="简答"><a href="#简答" class="headerlink" title="简答"></a>简答</h3><h4 id="1-软件工程的定义"><a href="#1-软件工程的定义" class="headerlink" title="1. 软件工程的定义"></a>1. 软件工程的定义</h4><p>首先翻译一下来自Wikipedia的定义：<strong>软件工程是进行软件开发，操作和维护的一种系统化，规范化，可量化的方法，是工程实践在软件开发上的应用和研究</strong>。<br>按照我自己的理解，软件工程就是对于软件开发的每一个步骤（开发，操作，维护，成本……）的一个全方位的考量，是管理一款软件全部生产流程的学科。</p>
+<h4 id="2-解释导致-software-crisis-本质原因、表现，述说克服软件危机的方法"><a href="#2-解释导致-software-crisis-本质原因、表现，述说克服软件危机的方法" class="headerlink" title="2. 解释导致 software crisis 本质原因、表现，述说克服软件危机的方法"></a>2. 解释导致 software crisis 本质原因、表现，述说克服软件危机的方法</h4><ul>
+<li><strong>本质原因：</strong>随着计算机的发展，软件的需求越来越复杂，软件规模变得越来越大，计算能力依照摩尔定律进行提升，因此落后的软件生产方式无法控制满足这样的需求，因此产生了软件危机；</li>
+<li><strong>表现：</strong>比如软件开发进度难以预测，软件开发成本难以控制，用户对产品功能难以满足，软件产品质量无法保证，软件产品难以维护，软件缺少适当的文档资料等；</li>
+<li><strong>客服软件危机的方法：</strong>首先要引入先进的管理办法，这就是软件工程要学习的内容；</li>
+</ul>
+<h4 id="3-软件生命周期"><a href="#3-软件生命周期" class="headerlink" title="3. 软件生命周期"></a>3. 软件生命周期</h4><p>就是对软件开发的各个过程进行了划分，主要可以划分为以下的几个阶段：</p>
+<p><strong>可行性分析与计划，需求分析，设计，编码实现，测试，运行和维护</strong></p>
+<p>人们又建立了不同的软件生命周期模型，比如瀑布法，划分了五个过程（Requirement需求；Design设计；Implementation编码实现；Verification验证测试；Maintenance维护），其它的模型有不同的划分；</p>
+<h4 id="4-SWEBoK-的-15-个知识域（An-Overview-of-the-SWEBOK-Guide-请中文翻译其名称与简短说明）"><a href="#4-SWEBoK-的-15-个知识域（An-Overview-of-the-SWEBOK-Guide-请中文翻译其名称与简短说明）" class="headerlink" title="4. SWEBoK 的 15 个知识域（An Overview of the SWEBOK Guide 请中文翻译其名称与简短说明）"></a>4. SWEBoK 的 15 个知识域（<a href="https://www.sebokwiki.org/wiki/An_Overview_of_the_SWEBOK_Guide" target="_blank" rel="noopener">An Overview of the SWEBOK Guide</a> 请中文翻译其名称与简短说明）</h4><h5 id="2-软件工程实践中的知识领域"><a href="#2-软件工程实践中的知识领域" class="headerlink" title="2  软件工程实践中的知识领域"></a>2  软件工程实践中的知识领域</h5><ul>
+<li><p><strong>2.1    Software Requirements 软件要求</strong><br>涉及软件要求的启发、协商、分析、规范和验证。软件行业普遍承认, 当软件工程项目执行不力时, 这些项目就会非常脆弱。软件需求表达了对软件产品的需求和限制, 这些需求和约束有助于解决一些现实世界的问题。</p>
+</li>
+<li><p><strong>2.2    Software Design 软件设计</strong><br>设计系统或组件的体系结构、组件、接口和其他特征的过程和结果 (ieee 1991)。</p>
+</li>
+<li><p><strong>2.3    Software Construction 软件构建</strong><br>指通过详细设计、编码、单元测试、集成测试、调试和验证相结合的方式, 详细创建工作软件。</p>
+</li>
+<li><p><strong>2.4    Software Testing 软件测试</strong><br>测试是一项通过识别缺陷来评估产品质量和改进产品质量的活动。软件测试涉及针对有限的测试用例集上的预期行为对程序的行为进行动态验证。</p>
+</li>
+<li><p><strong>2.5    Software Maintenance 软件维护</strong><br>软件维护包括增强现有功能、调整软件以在新的和改进的操作环境中运行以及纠正缺陷。</p>
+</li>
+<li><p><strong>2.6    Software Configuration Management 软件配置管理</strong><br>软件配置管理 (scm) 是在不同时间点识别系统配置的学科, 目的是系统地控制对配置的更改, 以及维护完整性和在整个软件生命周期中配置的可追溯性。</p>
+</li>
+<li><p><strong>2.7    Software Engineering Management 软件工程管理</strong><br>软件工程管理包括规划、协调、测量、报告和控制项目或计划, 以确保软件的开发和维护是系统的、有纪律的和量化的。</p>
+</li>
+<li><p><strong>2.8    Software Engineering Process 软件工程过程</strong><br>软件工程负责软件生命周期过程的定义、实施、评估、测量、管理和改进。</p>
+</li>
+<li><p><strong>2.9    Software Engineering Models and Methods 软件工程模型与方法</strong><br>软件工程模型和方法 ka 解决了包含多个生命周期阶段的方法。</p>
+</li>
+<li><p><strong>2.10    Software Quality 软件质量</strong><br>软件质量是一个普遍存在的软件生命周期问题。</p>
+</li>
+<li><p><strong>2.11    Software Engineering Professional Practice 软件工程专业实践</strong><br>软件工程专业实践涉及软件工程师以专业、负责和合乎道德的方式实践软件工程所必须具备的知识、技能和态度。</p>
+</li>
+</ul>
+<h5 id="3-Knowledge-Areas-Characterizing-the-Educational-Requirements-of-Software-Engineering-软件工程教育要求知识领域"><a href="#3-Knowledge-Areas-Characterizing-the-Educational-Requirements-of-Software-Engineering-软件工程教育要求知识领域" class="headerlink" title="3  Knowledge Areas Characterizing the Educational Requirements of Software Engineering 软件工程教育要求知识领域"></a>3  Knowledge Areas Characterizing the Educational Requirements of Software Engineering 软件工程教育要求知识领域</h5><ul>
+<li><p><strong>3.1    Software Engineering Economics 软件工程经济学</strong><br>软件工程经济学负责在业务环境中做出决策, 使技术决策与组织的业务目标保持一致。</p>
+</li>
+<li><p><strong>3.2    Computing Foundations 计算基础</strong><br>涵盖了提供软件工程实践所需的计算背景的基本主题。所涉及的主题包括问题解决技术、抽象、算法和复杂性、编程基础知识、并行和分布式计算的基础知识、计算机组织、操作系统和网络通信。</p>
+</li>
+<li><p><strong>3.3    Mathematical Foundations 数学基础</strong><br>为软件工程的实践提供必要的数学背景；</p>
+</li>
+<li><p><strong>3.4    Engineering Foundations 工程基础</strong><br>涵盖了为软件工程实践提供必要的工程背景的基本主题。</p>
+</li>
+</ul>
+<h4 id="5-简单解释-CMMI-的五个级别。例如：Level-1-Initial：无序，自发生产模式。"><a href="#5-简单解释-CMMI-的五个级别。例如：Level-1-Initial：无序，自发生产模式。" class="headerlink" title="5. 简单解释 CMMI 的五个级别。例如：Level 1 - Initial：无序，自发生产模式。"></a>5. 简单解释 CMMI 的五个级别。例如：Level 1 - Initial：无序，自发生产模式。</h4><p><strong>成熟度级别 1: 初始 Initial</strong><br>不可预测和被动。工作已经完成, 但经常被推迟和超出预算。</p>
+<p><strong>成熟度级别 2: 托管 Managed</strong><br>在项目级别上管理。项目是有计划的、执行的、测量的和控制的。</p>
+<p><strong>成熟度级别 3: 定义 Defined</strong><br>主动, 而不是反应。全组织标准为项目、计划和投资组合提供指导。</p>
+<p><strong>成熟度级别 4: 量化管理 Quantitatively Managed</strong><br>测量和控制。本组织以数据为导向, 实现量化的业绩改进目标, 这些目标是可预测的, 并与之保持一致, 以满足内部和外部利益攸关方的需求。</p>
+<p><strong>成熟度级别 5: 优化 Optimizing</strong><br>稳定灵活。本组织注重持续改进, 旨在对机遇和变化进行支点和反应。组织的稳定性为敏捷性和创新提供了一个平台。</p>
+<h4 id="6-用自己语言简述-SWEBok-或-CMMI-（约200字）"><a href="#6-用自己语言简述-SWEBok-或-CMMI-（约200字）" class="headerlink" title="6. 用自己语言简述 SWEBok 或 CMMI （约200字）"></a>6. 用自己语言简述 SWEBok 或 CMMI （约200字）</h4><p><strong>SWEBok</strong>：是IEEE组织的一个项目，软件工程知识体系指南。在这本指南中，IEEE首次建立了软件工程领域知识体系的基线，他们的工作满足了部分想要促进该领域理论和实践的进展的想法。在这之前，社会上的相关工作受到了历史学科经验的指导，但没有受到一些遇到的问题或者解决方法的帮助。它是对过去几年不断发展和演变的知识体系的一个概略和指南，这个知识体系不是静态的，必须随着软件工程的成熟而发展和演变，是软件工程基础设施中一个有价值的元素。</p>
+<p><strong>CMMI</strong>：全称是Capability Maturity Model Integration，即能力成熟度模型集成，其目的是帮助软件企业对软件工程过程进行管理和改进，增强开发与改进能力，从而能按时地、不超预算地开发出高质量的软件。其所依据的想法是：只要集中精力持续努力去建立有效的软件工程过程的基础结构，不断进行管理的实践和过程的改进，就可以克服软件开发中的困难。CMMI为改进一个组织的各种过程提供了一个单一的集成化框架，新的集成模型框架消除了各个模型的不一致性，减少了模型间的重复，增加透明度和理解，建立了一个自动的、可扩展的框架。因而能够从总体上改进组织的质量和效率。CMMI主要关注点就是成本效益、明确重点、过程集中和灵活性四个方面。</p>
+]]></content>
+      <categories>
+        <category>系统分析与设计</category>
+      </categories>
+      <tags>
+        <tag>系统分析与设计</tag>
+        <tag>作业</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ImGui入门笔记</title>
+    <url>/posts/ImGui%E5%85%A5%E9%97%A8%E7%AC%94%E8%AE%B0-2019-03-10/</url>
+    <content><![CDATA[<p>这个玩意资料有点少，所以记录一下怎么开始上路，怎么爬一些坑，供自己和别人参考……</p>
+<a id="more"></a>
+<h2 id="怎么学这东西"><a href="#怎么学这东西" class="headerlink" title="怎么学这东西"></a>怎么学这东西</h2><p>这可能是最大的问题了。</p>
+<p>首先肯定要看它的官网，<a href="https://github.com/ocornut/imgui" target="_blank" rel="noopener">https://github.com/ocornut/imgui</a>；</p>
+<blockquote>
+<p> 然后你会发现官网的这个RAEDME是个蛇皮没什么大用……</p>
+</blockquote>
+<p>然后我们发现目录下有个doc目录，进去发现也没什么用，真的是……</p>
+<p>有用的部分在example文件夹下， <a href="https://github.com/ocornut/imgui/blob/master/examples/example_glfw_opengl3/main.cpp" target="_blank" rel="noopener">比如这个示例！</a>这就是我们学习的最重要的资源了！！！</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><ul>
+<li><p>首先<code>git clone</code>这个仓库</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/ocornut/imgui</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>然后把目录下的所有<code>.h</code>和<code>.cpp</code>文件都复制到自己的项目里</p>
+<p>  <img src="/posts/ImGui入门笔记-2019-03-10/ImGui入门笔记/1552229627219.png" alt="1552229627219"></p>
+<p>  就这些东西，全部复制进去就对了；</p>
+</li>
+<li><p>还没完，打开examples文件夹，进去可以看到有好多<code>imgui_impl_***.*</code>，挑选自己需要的那些都复制到自己的项目里；比如我的目录下</p>
+<p>  <img src="/posts/ImGui入门笔记-2019-03-10/ImGui入门笔记/1552229937523.png" alt="1552229937523"></p>
+<p>  错了可能是复制多了几项，来回删一删试试……还是比较迷的……</p>
+</li>
+<li><p>然后就可以跑了，跑一下发现报错<strong>gl3w.h</strong>没有，当然了用的不是这个库当然就没有了……打开imgui_impl_opengl3.h，把这里改成你所使用的库</p>
+<p>  <img src="/posts/ImGui入门笔记-2019-03-10/ImGui入门笔记/1552233375923.png" alt="1552233375923"></p>
+<p>  应该是都在这几个里边了，我使用的是glad，所以使用了glad的宏；</p>
+</li>
+</ul>
+<h2 id="跑跑第一个程序"><a href="#跑跑第一个程序" class="headerlink" title="跑跑第一个程序"></a>跑跑第一个程序</h2><p>不出意外的话应该是可以跑了，我们可以直接把仓库的examples文件夹里，合适自己的用的那个复制过来试试，比如我用的是glfw+openGL3，我复制了<a href="https://github.com/ocornut/imgui/blob/master/examples/example_glfw_opengl3/main.cpp" target="_blank" rel="noopener">这里的代码</a>（路径是<code>/examples/example_glfw_opengl3/main.cpp</code>），这就可以点点画画了。</p>
+]]></content>
+      <categories>
+        <category>ImGui</category>
+      </categories>
+      <tags>
+        <tag>ImGui</tag>
+        <tag>入门笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>OpenGL入门笔记</title>
+    <url>/posts/OpenGL%E5%85%A5%E9%97%A8%E7%AC%94%E8%AE%B0-2019-03-09/</url>
+    <content><![CDATA[<p>学习OpenGL还是挺难理解的，入门路上遇到了一些问题，在这里埋埋坑，希望可以帮助一些后来者</p>
+<p>主要的学习来源是<a href="https://learnopengl-cn.github.io/01%20Getting%20started/04%20Hello%20Triangle/" target="_blank" rel="noopener">learnopengl的中文教程官网</a>；</p>
+<p>基本不会写到具体的过程，具体的过程在教程官网上已经非常详细了，所以这里基本上会写成类似于Q&amp;A，或者记录一些不理解的地方的形式……</p>
+<a id="more"></a>
+<h2 id="链接顶点属性"><a href="#链接顶点属性" class="headerlink" title="链接顶点属性"></a>链接顶点属性</h2><h2 id="EBO-IBO，索引"><a href="#EBO-IBO，索引" class="headerlink" title="EBO/IBO，索引"></a>EBO/IBO，索引</h2><p>这里讲的不错，<a href="https://blog.csdn.net/fenghen777/article/details/46981781" target="_blank" rel="noopener">https://blog.csdn.net/fenghen777/article/details/46981781</a></p>
+<p>我们还是按照官网的教程来讲，官网给了这样一个例子，要画一个4边形；</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">float</span> vertices[] = &#123;</span><br><span class="line">    <span class="comment">// 第一个三角形</span></span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>,   <span class="comment">// 右上角</span></span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>,  <span class="comment">// 右下角</span></span><br><span class="line">    <span class="number">-0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>,  <span class="comment">// 左上角</span></span><br><span class="line">    <span class="comment">// 第二个三角形</span></span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>,  <span class="comment">// 右下角</span></span><br><span class="line">    <span class="number">-0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>, <span class="comment">// 左下角</span></span><br><span class="line">    <span class="number">-0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>   <span class="comment">// 左上角</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>为什么是6个点呢，因为OpenGL是按照三角形来渲染的，所以一个四边形就要分为两个三角形来绘制。</p>
+<p><strong>这样就造成了一个问题</strong>，有两个点是重复的，我们当然不想重复，不优雅啊！（当然最重要的问题是会造成多余的存储开销，多存了50%的点，如果三角形更多的话，这个开销还是很可观的）。</p>
+<p>所以我们考虑一个新的方式，就是只输入4个顶点，然后我们指定绘制的顺序，就是这样：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">float</span> vertices[] = &#123;</span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>,   <span class="comment">// 右上角</span></span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>,  <span class="comment">// 右下角</span></span><br><span class="line">    <span class="number">-0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>, <span class="comment">// 左下角</span></span><br><span class="line">    <span class="number">-0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>   <span class="comment">// 左上角</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">int</span> indices[] = &#123; <span class="comment">// 注意索引从0开始! </span></span><br><span class="line">    <span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="comment">// 第一个三角形</span></span><br><span class="line">    <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>  <span class="comment">// 第二个三角形</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>不知道你们怎么样，我第一次看是有点懵，仔细看了一下大概是这样的：</p>
+<p><img src="/posts/OpenGL入门笔记-2019-03-09/OpenGL入门笔记/1552133652192.png" alt="没错！就是这个顺序"></p>
+<p>明白了吧，这个顶点的顺序就是顶点数组里的顺序。</p>
+]]></content>
+      <categories>
+        <category>OpenGL</category>
+      </categories>
+      <tags>
+        <tag>OpenGL</tag>
+      </tags>
+  </entry>
+</search>
