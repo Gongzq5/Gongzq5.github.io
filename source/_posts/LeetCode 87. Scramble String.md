@@ -1,5 +1,6 @@
 ---
 title: LeetCode 87. Scramble String
+date: 2019-03-07 00:00:00
 tags: 
     - LeetCode
     - String
