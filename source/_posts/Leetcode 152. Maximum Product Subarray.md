@@ -1,5 +1,6 @@
 ---
 title: Leetcode 152. Maximum Product Subarray
+date: 2019-03-07 00:00:00
 tags:
     - LeetCode 
     - Array 
