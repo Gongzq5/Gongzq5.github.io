@@ -153,7 +153,8 @@ menu:
   tags: /tags/ || tags
   categories: /categories/ || th
   archives: /archives/ || archive
-  swsad hw: /2019 SWSAD Homework/ || copy #clipboard
+  swsad: /2019 SWSAD Homework/ || clipboard #copy
+  books: /books/ || book
   #schedule: /schedule/ || calendar
   #sitemap: /sitemap.xml || sitemap
   #commonweal: /404/ || heartbeat
