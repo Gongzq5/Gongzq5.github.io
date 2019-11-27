@@ -1,0 +1,444 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>条款03：尽可能的使用const关键字 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="tiao-kuan-04.html" />
+    
+    
+    <link rel="prev" href="tiao-kuan-02.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="chapter1.html">
+            
+                <a href="chapter1.html">
+            
+                    
+                    导读
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="tiao-kuan-01.html">
+            
+                <a href="tiao-kuan-01.html">
+            
+                    
+                    条款01：视C++为一个语言联邦，而不是一个单个语言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="tiao-kuan-02.html">
+            
+                <a href="tiao-kuan-02.html">
+            
+                    
+                    条款02：用const,enum,inline而不是#define
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.5" data-path="tiao-kuan-03-ff1a-jin-ke-neng-de-shi-yong-const-guan-jian-zi.html">
+            
+                <a href="tiao-kuan-03-ff1a-jin-ke-neng-de-shi-yong-const-guan-jian-zi.html">
+            
+                    
+                    条款03：尽可能的使用const关键字
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="tiao-kuan-04.html">
+            
+                <a href="tiao-kuan-04.html">
+            
+                    
+                    条款04：确定对象使用前已被初始化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="tiao-kuan-05-ff1a-le-jie-c-mo-mo-bian-xie-le-na-xie-han-shu.html">
+            
+                <a href="tiao-kuan-05-ff1a-le-jie-c-mo-mo-bian-xie-le-na-xie-han-shu.html">
+            
+                    
+                    条款05：了解C++默默编写了那些函数
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="tiao-kuan-06-ff1a-ruo-bu-xiang-shi-yong-bian-yi-qi-mo-ren-sheng-cheng-de-han-shu-ff0c-jiu-ming-que-ju-jue-ta.html">
+            
+                <a href="tiao-kuan-06-ff1a-ruo-bu-xiang-shi-yong-bian-yi-qi-mo-ren-sheng-cheng-de-han-shu-ff0c-jiu-ming-que-ju-jue-ta.html">
+            
+                    
+                    条款06：若不想使用编译器默认生成的函数，就明确拒绝它
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="tiao-kuan-07-ff1a-shan-yong-virtual-xi-gou-han-shu.html">
+            
+                <a href="tiao-kuan-07-ff1a-shan-yong-virtual-xi-gou-han-shu.html">
+            
+                    
+                    条款07：善用virtual析构函数
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="tiao-kuan-08.html">
+            
+                <a href="tiao-kuan-08.html">
+            
+                    
+                    条款08：析构中的异常不要走出函数
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >条款03：尽可能的使用const关键字</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id="&#x6761;&#x6B3E;03&#xFF1A;&#x5C3D;&#x53EF;&#x80FD;&#x7684;&#x4F7F;&#x7528;const&#x5173;&#x952E;&#x5B57;">&#x6761;&#x6B3E;03&#xFF1A;&#x5C3D;&#x53EF;&#x80FD;&#x7684;&#x4F7F;&#x7528;<em>const</em>&#x5173;&#x952E;&#x5B57;</h2>
+<h3 id="&#x4E00;&#x3001;&#x5148;&#x5199;&#x5199;const&#x7684;&#x7528;&#x6CD5;">&#x4E00;&#x3001;&#x5148;&#x5199;&#x5199;<code>const</code>&#x7684;&#x7528;&#x6CD5;</h3>
+<table>
+<thead>
+<tr>
+<th>const&#x7684;&#x4F4D;&#x7F6E;</th>
+<th>&#x542B;&#x4E49;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>const int a = 2;</code></td>
+<td><code>a</code>&#x7684;&#x503C;&#x4E0D;&#x80FD;&#x88AB;&#x4FEE;&#x6539;</td>
+</tr>
+<tr>
+<td><code>const int *p = &amp;a;</code></td>
+<td><code>p</code>&#x4E0D;&#x4F1A;&#x88AB;&#x4FEE;&#x6539;&#xFF0C;&#x5373;<code>p</code>&#x8FD9;&#x4E2A;&#x6307;&#x9488;&#x4E0D;&#x4F1A;&#x6307;&#x5411;&#x5176;&#x4ED6;&#x5730;&#x65B9;&#x4E86;</td>
+</tr>
+<tr>
+<td><code>int* const p = &amp;a;</code></td>
+<td>&#x5373;<code>p</code>&#x8FD9;&#x4E2A;&#x6307;&#x9488;&#x6307;&#x5411;&#x7684;&#x503C;&#x4E0D;&#x53EF;&#x4EE5;&#x66F4;&#x6539;</td>
+</tr>
+<tr>
+<td><code>const int* const p = &amp;a;</code></td>
+<td>&#x5373;<code>p</code>&#x8FD9;&#x4E2A;&#x6307;&#x9488;&#x6307;&#x5411;&#x7684;&#x503C;&#x548C;&#x81EA;&#x5DF1;&#x90FD;&#x4E0D;&#x80FD;&#x53D1;&#x751F;&#x66F4;&#x6539;&#x3002;</td>
+</tr>
+</tbody>
+</table>
+<h3 id="&#x4FEE;&#x9970;&#x7C7B;&#x6210;&#x5458;&#x7684;const&#x65B9;&#x6CD5;">&#x4FEE;&#x9970;&#x7C7B;&#x6210;&#x5458;&#x7684;<code>const</code>&#x65B9;&#x6CD5;</h3>
+<p><code>const</code>&#x8FD8;&#x53EF;&#x4EE5;&#x653E;&#x5728;&#x7C7B;&#x65B9;&#x6CD5;&#x540E;&#x8FB9;&#xFF0C;&#x8868;&#x793A;&#x6B64;&#x51FD;&#x6570;&#x627F;&#x8BFA;&#x4E0D;&#x4FEE;&#x6539;&#x7C7B;&#x6210;&#x5458;&#x53D8;&#x91CF;&#x7684;&#x503C;&#xFF0C;&#x6BD4;&#x5982;&#xFF1A;</p>
+<pre><code class="lang-cpp"><span class="hljs-keyword">class</span> B {
+    <span class="hljs-keyword">int</span> num;
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">show</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{
+        <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; num &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+    }
+};
+</code></pre>
+<p>&#x7F16;&#x8BD1;&#x5668;&#x4F1A;&#x6267;&#x884C;&#x4E00;&#x79CD;&#x88AB;&#x79F0;&#x4E3A;<em>bitwise</em>&#x7684;&#x68C0;&#x67E5;&#xFF0C;&#x68C0;&#x67E5;&#x662F;&#x5426;&#x5B58;&#x5728;&#x4FEE;&#x6539;&#x5185;&#x90E8;&#x503C;&#x7684;&#x60C5;&#x51B5;&#x3002;&#x81F3;&#x4E8E;&#x5230;&#x4E86;&#x6211;&#x4EEC;&#x771F;&#x6B63;&#x4F7F;&#x7528;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x80FD;&#x4E0D;&#x4F1A;&#x9075;&#x5FAA;&#x8FD9;&#x4E2A;<em>bitwise</em>&#x7684;&#x68C0;&#x67E5;&#x65B9;&#x5F0F;&#x3002;</p>
+<p>&#x6BD4;&#x5982;&#xFF0C;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x5728;&#x7C7B;&#x7684;&#x6210;&#x5458;&#x4E2D;&#x589E;&#x52A0;&#x4E86;&#x4E00;&#x4E2A;&#x4F5C;&#x4E3A;&#x7F13;&#x5B58;&#x7684;&#x53D8;&#x91CF;&#x503C;&#xFF0C;&#x6BD4;&#x5982;&#xFF1A;</p>
+<pre><code class="lang-cpp"><span class="hljs-keyword">class</span> B {
+    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; nums;
+    <span class="hljs-keyword">int</span> numLen;
+    <span class="hljs-keyword">bool</span> numLenValid;
+
+    <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getLen</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{
+        <span class="hljs-keyword">if</span> (numLenValid) {
+            <span class="hljs-keyword">return</span> numLen;
+        }
+        numLen = nums.size();
+        numLenValid = numLen;
+        <span class="hljs-keyword">return</span> numLen;
+    }
+};
+</code></pre>
+<blockquote>
+<p>&#x8FD9;&#x91CC;&#x597D;&#x50CF;&#x6709;&#x70B9;&#x54B8;&#x9C7C;&#xFF0C;&#x4F46;&#x662F;&#x5047;&#x5982;&#x6211;&#x4EEC;&#x628A;<code>nums.size()</code>&#x66FF;&#x6362;&#x6210;&#x4E00;&#x4E2A;&#x5F88;&#x8D39;&#x4E8B;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;&#x7F13;&#x5B58;&#x53D8;&#x91CF;&#x5C31;&#x4F53;&#x73B0;&#x51FA;&#x4E86;&#x5B83;&#x7684;&#x4EF7;&#x503C;&#x4E86;&#x3002;</p>
+</blockquote>
+<p>&#x660E;&#x663E;<code>getLen()</code>&#x4ECE;&#x8BED;&#x4E49;&#x4E0A;&#x8BB2;&#x662F;&#x4E0D;&#x4F1A;&#x4FEE;&#x6539;&#x7C7B;&#x5185;&#x7684;&#x5143;&#x7D20;&#x7684;&#x503C;&#x7684;&#xFF0C;&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x76F4;&#x63A5;&#x5199;&#x6210;<code>return nums.size()</code>&#x5F53;&#x7136;&#x4E5F;&#x662F;OK&#x7684;&#xFF0C;&#x4F46;&#x662F;&#x5728;&#x8FD9;&#x6837;&#x7684;&#x573A;&#x666F;&#x4E0B;&#x5B83;&#x53C8;&#x786E;&#x5B9E;&#x4FEE;&#x6539;&#x4E86;&#x7C7B;&#x5185;&#x5143;&#x7D20;&#x7684;&#x503C;&#x3002;&#x6B64;&#x65F6;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;<code>mutable</code>&#x5173;&#x952E;&#x5B57;&#x3002;</p>
+<pre><code class="lang-cpp"><span class="hljs-keyword">class</span> B {
+    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; nums;
+    <span class="hljs-keyword">mutable</span> <span class="hljs-keyword">int</span> numLen;
+    <span class="hljs-keyword">mutable</span> <span class="hljs-keyword">bool</span> numLenValid;
+    <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getLen</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{
+        <span class="hljs-keyword">if</span> (numLenValid) {
+            <span class="hljs-keyword">return</span> numLen;
+        }
+        numLen = nums.size();
+        numLenValid = numLen;
+        <span class="hljs-keyword">return</span> numLen;
+    }
+};
+</code></pre>
+<p>&#x6B64;&#x65F6;&#x7684;&#x7F16;&#x8BD1;&#x5C31;&#x6CA1;&#x6709;&#x95EE;&#x9898;&#x4E86;&#x3002;</p>
+<h3 id="&#x4F7F;&#x7528;non-const&#x8C03;&#x7528;const&#x4EE5;&#x5B8C;&#x6210;&#x4EE3;&#x7801;&#x590D;&#x7528;">&#x4F7F;&#x7528;<code>non-const</code>&#x8C03;&#x7528;<code>const</code>&#x4EE5;&#x5B8C;&#x6210;&#x4EE3;&#x7801;&#x590D;&#x7528;</h3>
+<p>&#x4E24;&#x4E2A;&#x51FD;&#x6570;&#x7684;<code>cosnt</code>&#x4FEE;&#x9970;&#x4E0D;&#x540C;&#x65F6;&#xFF0C;&#x4ED6;&#x4EEC;&#x5DF2;&#x7ECF;&#x662F;&#x4E24;&#x4E2A;&#x4E0D;&#x540C;&#x7684;&#x51FD;&#x6570;&#x4E86;&#x3002;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x60F3;&#x8981;&#x4E24;&#x4E2A;&#x53EA;&#x6709;<code>const</code>&#x4FEE;&#x9970;&#x4E0D;&#x540C;&#x7684;&#x51FD;&#x6570;&#x4E4B;&#x95F4;&#x5171;&#x4EAB;&#x5927;&#x90E8;&#x5206;&#x76F8;&#x540C;&#x7684;&#x4EE3;&#x7801;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x7528;<code>non-const</code>&#x7684;&#x51FD;&#x6570;&#x8C03;&#x7528;<code>const</code>&#x7684;&#x51FD;&#x6570;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x53CD;&#x8FC7;&#x6765;&#x3002;</p>
+<blockquote>
+<p>&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x5DF2;&#x7ECF;&#x627F;&#x8BFA;&#x5728;<code>const</code>&#x51FD;&#x6570;&#x91CC;&#x4E0D;&#x4FEE;&#x6539;&#x5185;&#x90E8;&#x7684;&#x503C;&#xFF0C;&#x6240;&#x4EE5;&#x4F7F;&#x7528;<code>const</code>&#x8C03;&#x7528;&#x4E00;&#x4E2A;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x627F;&#x8BFA;&#x7684;<code>non-const</code>&#x662F;&#x4E00;&#x79CD;&#x4E0D;&#x597D;&#x7684;&#x884C;&#x4E3A;&#x3002;&#x800C;&#x53CD;&#x8FC7;&#x6765;&#x5219;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x987E;&#x8651;&#x3002;</p>
+</blockquote>
+<pre><code class="lang-cpp"><span class="hljs-keyword">class</span> TextBlock{
+<span class="hljs-keyword">public</span>&#xFF1A;
+    <span class="hljs-keyword">const</span> chars <span class="hljs-keyword">operator</span>[] (<span class="hljs-built_in">std</span>:&#xFF1A;<span class="hljs-keyword">size_t</span> position) <span class="hljs-keyword">const</span>
+    <span class="hljs-comment">// &#x4E00;&#x5982;&#x65E2;&#x5F80; </span>
+    { 
+        <span class="hljs-keyword">return</span> text[position];
+    }
+
+    <span class="hljs-keyword">char</span>&amp;<span class="hljs-keyword">operator</span>[](<span class="hljs-built_in">std</span>:&#xFF1A;<span class="hljs-keyword">size_t</span> position) 
+    <span class="hljs-comment">//&#x73B0;&#x5728;&#x53EA;&#x8C03;&#x7528;const op[]</span>
+    {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">const_cast</span>&lt;<span class="hljs-keyword">char</span>&amp;&gt;( 
+           <span class="hljs-comment">//&#x5C06;op[]&#x8FD4;&#x56DE;&#x503C;&#x7684;const&#x8F6C;&#x9664;</span>
+           <span class="hljs-keyword">static</span> cast&lt;<span class="hljs-keyword">const</span> TextBlock&gt;(*<span class="hljs-keyword">this</span>) 
+                <span class="hljs-comment">//&#x4E3A;*this&#x52A0;&#x4E0A;const</span>
+                [position] <span class="hljs-comment">//&#x8C03;&#x7528;const op[]</span>
+            )&#xFF1B;
+    }
+};
+</code></pre>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="tiao-kuan-02.html" class="navigation navigation-prev " aria-label="Previous page: 条款02：用const,enum,inline而不是#define">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="tiao-kuan-04.html" class="navigation navigation-next " aria-label="Next page: 条款04：确定对象使用前已被初始化">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"条款03：尽可能的使用const关键字","level":"1.5","depth":1,"next":{"title":"条款04：确定对象使用前已被初始化","level":"1.6","depth":1,"path":"tiao-kuan-04.md","ref":"tiao-kuan-04.md","articles":[]},"previous":{"title":"条款02：用const,enum,inline而不是#define","level":"1.4","depth":1,"path":"tiao-kuan-02.md","ref":"tiao-kuan-02.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"tiao-kuan-03-ff1a-jin-ke-neng-de-shi-yong-const-guan-jian-zi.md","mtime":"2019-09-25T01:58:42.809Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-19T06:16:48.470Z"},"basePath":".","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="gitbook/gitbook.js"></script>
+    <script src="gitbook/theme.js"></script>
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

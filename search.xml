@@ -149,14 +149,15 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[Leetcode 264. Ugly Number II]]></title>
-    <url>%2Fposts%2FLeetcode%20264.%20Ugly%20Number%20II-2019-03-07%2F</url>
-    <content type="text"><![CDATA[Write a program to find the n-th ugly number. Ugly numbers are positive numbers whose prime factors only include 2, 3, 5. Example: 123Input: n = 10Output: 12Explanation: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12 is the sequence of the first 10 ugly numbers. Note: 1 is typically treated as an ugly number. n does not exceed 1690. Solution123456789101112131415class Solution &#123;public: int nthUglyNumber(int n) &#123; int i2 = 0, i3 = 0, i5 = 0; vector&lt;int&gt; dp &#123;1&#125;; for (int i = 0; i &lt; n; i++) &#123; int m = min( min(dp[i2]*2, dp[i3]*3), dp[i5]*5 ); dp.push_back(m); if (m == dp[i2]*2) i2++; if (m == dp[i3]*3) i3++; if (m == dp[i5]*5) i5++; &#125; return dp[n-1]; &#125;&#125;; 题解应该大家看着还是挺迷茫的，我们从题目开始思考，要找的是质因数只有2、3、5的数，那么我们可以产生两种思路，一种是验证的思路，对于每个数进行验证，判断他是否有2、3、5之外的质因子；或者是采用构造的思路，从某个数开始构造满足这个条件的数字。 明显第一种思路耗时很久，毕竟现在还是没有很好地判断因子分解的算法。从另一种思路出发，我们可以这样考虑：所有以2、3、5为因子的数相乘并不会产生其他的素数作为因子，我们可以简单地推导一下 很明显素数 $p$ 和 $q$ 相乘时，$pq$不存在其他的素数作为它的因子； $ p^i q^j $明显也没有其他素数作为因子 因此这个算法应该是成立的！ 因此，又为了排序的目的，我们逐个取最小值产生ugly number的数组。 如下： 1234567t2 = 0, t3 = 0, t5 = 0 uglg numbers [0] = 1for i from 1 to n uglg numbers [i] = min( uglg numbers [t2], uglg numbers [t3], uglg numbers [t5])return uglg numbers [n-1]]]></content>
+    <title><![CDATA[Leetcode 97. Interleaving String]]></title>
+    <url>%2Fposts%2FLeetcode%2097.%20Interleaving%20String-2019-03-07%2F</url>
+    <content type="text"><![CDATA[Given s1, s2, s3, find whether s3 is formed by the interleaving of s1 and s2. Example 1: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbcbcac&quot;Output: true Example 2: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbbaccc&quot;Output: false 题解使用动态规划求解。 首先我们分解子问题。如果s3是s1和s2的交错字符串的话，那么一定有以下的一种情况 s3的最后一位和s2的最后一位相同，此时s3前边的子串(除去最后一位)一定是s2的前边的子串与s1的交错字符串。 s3的最后一位和s1的最后一位相同，此时s3前边的子串(除去最后一位)一定是s1的前边的子串与s2的交错字符串。 这个很容易想到，因为构造出交错的字符串的时候肯定是从s1选1个char，又从s2选1个char，所以如果当前是交错的串的话，去掉最后一位相同的位之后，前边的串肯定也是根据这个规则构造来的，所以也是交错的字符串。 因此我们可以写出迭代方程： length·of·s3 = l \\ length·of·s2 = n \\ length·of·s1 = m \\ isInterleave(s3[0...l]) = \\ (s3[l] == s2[n] ^ isInterleave(s1[0...m], s2[0...n-1], s3[0...l-1])) \\ or (s3[l] == s1[m] ^ isInterleave(s1[0...m-1], s2[0...n], s3[0...l-1])) \\基于此方程我们写出如下的解： Solution12345678910111213141516171819202122232425class Solution &#123;public: bool isInterleave(string s1, string s2, string s3) &#123; int m = s1.length(), n = s2.length(), l = s3.length(); if (m + n != l) return false; vector&lt;vector&lt;bool&gt;&gt; dp(m+1, vector&lt;bool&gt;(n+1, false)); for (int i = 0; i &lt; m+1; i++) &#123; for (int j = 0; j &lt; n+1; j++) &#123; if (i == 0 &amp;&amp; j == 0) dp[0][0] = true; else if (i == 0) dp[i][j] = dp[i][j-1] &amp;&amp; s2[j-1] == s3[i+j-1]; // when i = 0, j = 1 // dp[0][1] = dp[0][0] and s2[1] == s3[1] else if (j == 0) dp[i][j] = dp[i-1][j] &amp;&amp; s1[i-1] == s3[i+j-1]; // when i = 1, j = 0 // dp[1][0] = dp[0][0] and s1[1] == s3[1] else dp[i][j] = (dp[i-1][j] &amp;&amp; s1[i-1]==s3[i+j-1]) || (dp[i][j-1] &amp;&amp; s2[j-1]==s3[i+j-1]); // when i = 1, j = 1 // dp[1][1] = // | dp[0][1] &amp;&amp; s1[1] == s3[2] // | dp[1][0] &amp;&amp; s2[1] == s3[1] &#125; &#125; return dp[m][n]; &#125;&#125;;]]></content>
       <categories>
         <category>LeetCode</category>
       </categories>
       <tags>
         <tag>LeetCode</tag>
+        <tag>String</tag>
         <tag>Algorithm</tag>
       </tags>
   </entry>
@@ -174,19 +175,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[Leetcode 97. Interleaving String]]></title>
-    <url>%2Fposts%2FLeetcode%2097.%20Interleaving%20String-2019-03-07%2F</url>
-    <content type="text"><![CDATA[Given s1, s2, s3, find whether s3 is formed by the interleaving of s1 and s2. Example 1: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbcbcac&quot;Output: true Example 2: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbbaccc&quot;Output: false 题解使用动态规划求解。 首先我们分解子问题。如果s3是s1和s2的交错字符串的话，那么一定有以下的一种情况 s3的最后一位和s2的最后一位相同，此时s3前边的子串(除去最后一位)一定是s2的前边的子串与s1的交错字符串。 s3的最后一位和s1的最后一位相同，此时s3前边的子串(除去最后一位)一定是s1的前边的子串与s2的交错字符串。 这个很容易想到，因为构造出交错的字符串的时候肯定是从s1选1个char，又从s2选1个char，所以如果当前是交错的串的话，去掉最后一位相同的位之后，前边的串肯定也是根据这个规则构造来的，所以也是交错的字符串。 因此我们可以写出迭代方程： length·of·s3 = l \\ length·of·s2 = n \\ length·of·s1 = m \\ isInterleave(s3[0...l]) = \\ (s3[l] == s2[n] ^ isInterleave(s1[0...m], s2[0...n-1], s3[0...l-1])) \\ or (s3[l] == s1[m] ^ isInterleave(s1[0...m-1], s2[0...n], s3[0...l-1])) \\基于此方程我们写出如下的解： Solution12345678910111213141516171819202122232425class Solution &#123;public: bool isInterleave(string s1, string s2, string s3) &#123; int m = s1.length(), n = s2.length(), l = s3.length(); if (m + n != l) return false; vector&lt;vector&lt;bool&gt;&gt; dp(m+1, vector&lt;bool&gt;(n+1, false)); for (int i = 0; i &lt; m+1; i++) &#123; for (int j = 0; j &lt; n+1; j++) &#123; if (i == 0 &amp;&amp; j == 0) dp[0][0] = true; else if (i == 0) dp[i][j] = dp[i][j-1] &amp;&amp; s2[j-1] == s3[i+j-1]; // when i = 0, j = 1 // dp[0][1] = dp[0][0] and s2[1] == s3[1] else if (j == 0) dp[i][j] = dp[i-1][j] &amp;&amp; s1[i-1] == s3[i+j-1]; // when i = 1, j = 0 // dp[1][0] = dp[0][0] and s1[1] == s3[1] else dp[i][j] = (dp[i-1][j] &amp;&amp; s1[i-1]==s3[i+j-1]) || (dp[i][j-1] &amp;&amp; s2[j-1]==s3[i+j-1]); // when i = 1, j = 1 // dp[1][1] = // | dp[0][1] &amp;&amp; s1[1] == s3[2] // | dp[1][0] &amp;&amp; s2[1] == s3[1] &#125; &#125; return dp[m][n]; &#125;&#125;;]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>LeetCode</tag>
-        <tag>String</tag>
-        <tag>Algorithm</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[LeetCode 87. Scramble String]]></title>
     <url>%2Fposts%2FLeetCode%2087.%20Scramble%20String-2019-03-07%2F</url>
     <content type="text"><![CDATA[题目Given a string s1, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively. Below is one possible representation of s1 = &quot;great&quot;: 1234567 great / \ gr eat / \ / \g r e at / \ a t To scramble the string, we may choose any non-leaf node and swap its two children. For example, if we choose the node &quot;gr&quot; and swap its two children, it produces a scrambled string &quot;rgeat&quot;. 1234567 rgeat / \ rg eat / \ / \r g e at / \ a t We say that &quot;rgeat&quot; is a scrambled string of &quot;great&quot;. Similarly, if we continue to swap the children of nodes &quot;eat&quot; and &quot;at&quot;, it produces a scrambled string &quot;rgtae&quot;. 1234567 rgtae / \ rg tae / \ / \r g ta e / \ t a We say that &quot;rgtae&quot; is a scrambled string of &quot;great&quot;. Given two strings s1 and s2 of the same length, determine if s2 is a scrambled string of s1. Example 1: 12Input: s1 = &quot;great&quot;, s2 = &quot;rgeat&quot;Output: true Example 2: 12Input: s1 = &quot;abcde&quot;, s2 = &quot;caebd&quot;Output: false Solution 283 / 283 test cases passed. Status: Accepted Runtime: 0 ms 123456789101112131415161718192021222324252627282930class Solution &#123;public: bool isScramble(string s1, string s2) &#123; if(s1==s2) return true; int len = s1.length(); int count[26] = &#123;0&#125;; for(int i=0; i&lt;len; i++) &#123; count[s1[i]-'a']++; count[s2[i]-'a']--; &#125; for(int i=0; i&lt;26; i++) &#123; if(count[i]!=0) return false; &#125; for(int i=1; i&lt;=len-1; i++) &#123; if( isScramble(s1.substr(0,i), s2.substr(0,i)) &amp;&amp; isScramble(s1.substr(i), s2.substr(i))) return true; if( isScramble(s1.substr(0,i), s2.substr(len-i)) &amp;&amp; isScramble(s1.substr(i), s2.substr(0,len-i))) return true; &#125; return false; &#125;&#125;; 题解可以分析一下，两个串是 isScramble 的话，那么其中一个串，是通过另一个串进行多次的交换得来的。交换可以交换两个相邻的字符，也可以交换相邻的子串。 类似的我们可以分析，如果两个串满足这个性质，那么我们可以把它们都分为两个长度相同的部分（前i位，记为s11, s21，和后n-i位，记为s12, s22）。 思路很简单，如果两个串是 isScramble 的话，那么肯定是上下相对应，或者交换后相对应（即满足isScramble的)。也就是说，我们可以通过分别验证这两个性质来确认其是否满足条件，只要有一个满足，那么它就是isScramble的。 在这样的思路上我们可以做一些优化，比如将每次递归的结果存起来，使得递归到已经算过的子串的时候可以直接获取答案而不是再次进行计算。 但是在实际使用中发现优化后的代码运行速度并不快，我推测这是因为当前递归程序的重复计算已经被消除了，相同的子串不会进行多次判断，因而完全无需进行记忆性的递归。 分析 时间复杂度： 这是一个递归算法，每次循环n次，最多递归n层，时间复杂度为O(n!)，这是最坏情况]]></content>
@@ -200,8 +188,20 @@
       </tags>
   </entry>
   <entry>
+    <title><![CDATA[Leetcode 264. Ugly Number II]]></title>
+    <url>%2Fposts%2FLeetcode%20264.%20Ugly%20Number%20II-2019-03-07%2F</url>
+    <content type="text"><![CDATA[Write a program to find the n-th ugly number. Ugly numbers are positive numbers whose prime factors only include 2, 3, 5. Example: 123Input: n = 10Output: 12Explanation: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12 is the sequence of the first 10 ugly numbers. Note: 1 is typically treated as an ugly number. n does not exceed 1690. Solution123456789101112131415class Solution &#123;public: int nthUglyNumber(int n) &#123; int i2 = 0, i3 = 0, i5 = 0; vector&lt;int&gt; dp &#123;1&#125;; for (int i = 0; i &lt; n; i++) &#123; int m = min( min(dp[i2]*2, dp[i3]*3), dp[i5]*5 ); dp.push_back(m); if (m == dp[i2]*2) i2++; if (m == dp[i3]*3) i3++; if (m == dp[i5]*5) i5++; &#125; return dp[n-1]; &#125;&#125;; 题解应该大家看着还是挺迷茫的，我们从题目开始思考，要找的是质因数只有2、3、5的数，那么我们可以产生两种思路，一种是验证的思路，对于每个数进行验证，判断他是否有2、3、5之外的质因子；或者是采用构造的思路，从某个数开始构造满足这个条件的数字。 明显第一种思路耗时很久，毕竟现在还是没有很好地判断因子分解的算法。从另一种思路出发，我们可以这样考虑：所有以2、3、5为因子的数相乘并不会产生其他的素数作为因子，我们可以简单地推导一下 很明显素数 $p$ 和 $q$ 相乘时，$pq$不存在其他的素数作为它的因子； $ p^i q^j $明显也没有其他素数作为因子 因此这个算法应该是成立的！ 因此，又为了排序的目的，我们逐个取最小值产生ugly number的数组。 如下： 1234567t2 = 0, t3 = 0, t5 = 0 uglg numbers [0] = 1for i from 1 to n uglg numbers [i] = min( uglg numbers [t2], uglg numbers [t3], uglg numbers [t5])return uglg numbers [n-1]]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>Algorithm</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[Hello World]]></title>
-    <url>%2Fposts%2Fhello-world-2019-03-07%2F</url>
+    <url>%2Fposts%2Fhello-world-2018-09-21%2F</url>
     <content type="text"><![CDATA[Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new "My New Post" More info: Writing Run server1$ hexo server More info: Server Generate static files1$ hexo generate More info: Generating Deploy to remote sites1$ hexo deploy More info: Deployment Do not just seek happiness for yourself. Seek happiness for all. Through kindness. Through mercy. David LevithanWide Awake]]></content>
   </entry>
 </search>
