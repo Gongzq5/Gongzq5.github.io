@@ -3,7 +3,7 @@
   <entry>
     <title><![CDATA[科学上网姿势汇总]]></title>
     <url>%2Fposts%2F%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91%E5%A7%BF%E5%8A%BF%E6%B1%87%E6%80%BB-2019-12-20%2F</url>
-    <content type="text"><![CDATA[汇总一下各种姿势，不然每次部署梯子都要单独找教程；三个： ShadowSocks, SSR, v2ray SS基本GG了，用一用就没了，怪费IP的；V2Ray号称无敌然而我就没成功过= =；现在用SSR是可以的； 估计是校园网的问题吧，大家可以都试试 ShadowSocks服务端小飞机主要是使用teddysun的部署脚本 1wget –no-check-certificate https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks.sh 然后加个权限，然后执行脚本部署 12chmod +x shadowsocks.sh./shadowsocks.sh 2&gt;&amp;1 | tee shadowsocks.log 客户端客户端的话，最好直接从官网下载 1https://github.com/shadowsocks/shadowsocks-windows/releases 给个4.1.8的链接： 1https://github.com/shadowsocks/shadowsocks-windows/releases/download/4.1.8.0/Shadowsocks-4.1.8.0.zip SSR服务端SSR也是使用部署脚本 1wget --no-check-certificate https://freed.ga/github/shadowsocksR.sh; bash shadowsocksR.sh 也是一样，全程指导，最后打印信息，无需赘述 客户端首选当然是github的release 1https://github.com/shadowsocksrr/shadowsocksr-csharp/releases 下不下来的话，再给个最近可以用的链接 1http://39.105.118.158:8083/ssr/windows/ShadowsocksR-win-4.9.2.zip 要是到时候不给用了就去github再找找吧 = = V2Ray服务端命令行部署脚本【首选】一个是命令行的部署脚本 1bash &lt;(curl -s -L https://git.io/v2ray.sh) 这个一定是首选，因为下边那个可能有点问题 部署以后可以使用一些命令，比如： 1v2ray url # 导出链接 web界面部署【可以尝试】另一个比较舒服的是这个项目：https://github.com/FunctionClub/V2ray.Fun；给了一个面板可以操纵，给个图看看 舒服的很哈，但是好像有点问题，给出部署命令 1wget -N --no-check-certificate https://raw.githubusercontent.com/FunctionClub/V2ray.Fun/master/install.sh &amp;&amp; bash install.sh 客户端推荐去github官网下载，不在v2ray组织下，应该是一个fork出来的项目= = 1https://github.com/2dust/v2rayN/releases 记得下载v2rayN-core的版本哈，给个3.2版本的链接 1https://github.com/2dust/v2rayN/releases/download/3.2/v2rayN-Core.zip 我下载以后偶尔会有双击打不开的问题，可以用命令行打开。 部署BBR加速这个加速我是不知道有么有用的，一直没什么体会； 应该SS下是可用的，在SSR和V2Ray下我就不知道了，把命令放出来吧 123wget --no-check-certificate https://raw.githubusercontent.com/wn789/BBR/master/bbr.shchmod +x bbr.sh./bbr.sh 关于在Linux下使用客户端的用户别用！！！ 回忆起我用命令行的梯子真是血泪史。 真要用自己去查吧，命令行下的确实是比较诡异的，不如Win下开箱即用]]></content>
+    <content type="text"><![CDATA[汇总一下各种姿势，不然每次部署梯子都要单独找教程；三个： ShadowSocks, SSR, v2ray SS基本GG了，用一用就没了，怪费IP的；V2Ray号称无敌然而我就没成功过= =；现在用SSR是可以的； 估计是校园网的问题吧，大家可以都试试 写在前边【基本配置条件介绍】介绍一下我的基本配置信息 我的VPS是在vultr上购买的，买最便宜的套餐就好了。但是买只有ipv6的好像有点问题，推荐还是找$3.5的购买。现在是在New York (NJ) 这个地区有。当然也可以买日本/新加坡的，就是要稍微贵点，延迟要低很多(200+ms -&gt; 100-ms)，但是这两个地区的IP被封的比较严重。大家自己考虑 服务端系统一般是Ubuntu 16/18，基本是一样的，为了稳定的话还是选用16吧，现在支持16的比较多（本文时间是 2019/12/20哈） PC客户端我肯定是用在win10下的； 手机客户端我是iOS，用美区账号下载的Potatso Lite，支持SS和SSR。但是！！不支持V2ray，v2ray这个东西的iOS客户端都要花钱，emmm反正我也不能用，就直接放弃了 ShadowSocks服务端小飞机主要是使用teddysun的部署脚本 1wget –no-check-certificate https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks.sh 然后加个权限，然后执行脚本部署 12chmod +x shadowsocks.sh./shadowsocks.sh 2&gt;&amp;1 | tee shadowsocks.log 客户端客户端的话，最好直接从官网下载 1https://github.com/shadowsocks/shadowsocks-windows/releases 给个4.1.8的链接： 1https://github.com/shadowsocks/shadowsocks-windows/releases/download/4.1.8.0/Shadowsocks-4.1.8.0.zip SSR服务端SSR也是使用部署脚本 1wget --no-check-certificate https://freed.ga/github/shadowsocksR.sh; bash shadowsocksR.sh 也是一样，全程指导，最后打印信息，无需赘述 客户端首选当然是github的release 1https://github.com/shadowsocksrr/shadowsocksr-csharp/releases 下不下来的话，再给个最近可以用的链接 1http://39.105.118.158:8083/ssr/windows/ShadowsocksR-win-4.9.2.zip 要是到时候不给用了就去github再找找吧 = = V2Ray服务端命令行部署脚本【首选】一个是命令行的部署脚本 1bash &lt;(curl -s -L https://git.io/v2ray.sh) 这个一定是首选，因为下边那个可能有点问题 部署以后可以使用一些命令，比如： 1v2ray url # 导出链接 web界面部署【可以尝试】另一个比较舒服的是这个项目：https://github.com/FunctionClub/V2ray.Fun；给了一个面板可以操纵，给个图看看 舒服的很哈，但是好像有点问题，给出部署命令 1wget -N --no-check-certificate https://raw.githubusercontent.com/FunctionClub/V2ray.Fun/master/install.sh &amp;&amp; bash install.sh 客户端推荐去github官网下载，不在v2ray组织下，应该是一个fork出来的项目= = 1https://github.com/2dust/v2rayN/releases 记得下载v2rayN-core的版本哈，给个3.2版本的链接 1https://github.com/2dust/v2rayN/releases/download/3.2/v2rayN-Core.zip 我下载以后偶尔会有双击打不开的问题，可以用命令行打开。 部署BBR加速这个加速我是不知道有么有用的，一直没什么体会； 应该SS下是可用的，在SSR和V2Ray下我就不知道了，把命令放出来吧 123wget --no-check-certificate https://raw.githubusercontent.com/wn789/BBR/master/bbr.shchmod +x bbr.sh./bbr.sh 关于在Linux下使用客户端的用户别用！！！ 回忆起我用命令行的梯子真是血泪史。 真要用自己去查吧，命令行下的确实是比较诡异的，不如Win下开箱即用]]></content>
       <categories>
         <category>科学上网</category>
       </categories>
@@ -17,7 +17,13 @@
   <entry>
     <title><![CDATA[git实现原理]]></title>
     <url>%2Fposts%2Fgit%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86-2019-12-13%2F</url>
-    <content type="text"><![CDATA[今天学习了一点git的实现原理，稍微记录一下 before all我们先来新建一个测试仓库，就叫test吧，使用git init来初始化这个仓库。 现在这个仓库是全空的，打开.git文件夹，发现里边有文件夹，但是objects啊refs啊都是空的； 1234567...+---objects| +---info| \---pack\---refs +---heads \---tags 我们就从这个仓库开始讲吧 git存储原理我们新建几个文件试一下，新建3个文件，a.txt，b.txt，c.txt，其中a和b的内容是一样的 1234$ cat a.txt b.txt c.txt1.2.3 1.2.34.5.6 然后我们使用 git add * 命令，然后再次查看.git文件夹 123456789101112+---objects| +---04| | 95c4a88caed0f036ffab0948c17d4b5fdc96c1| || +---bb| | 8dc6360fdfeabbafe0681b258a816b259a6048| || +---info| \---pack\---refs +---heads \---tags 看！多出来两个object文件，这两个文件内容是什么呢 123/d/test/.git/objects/04 (GIT_DIR!)$ cat 95c4a88caed0f036ffab0948c17d4b5fdc96c1 xK??OR0c0?3?3? N 发现不是明文的，这是因为 git将文件内容进行了压缩处理，并且加入了一些自己管理所需的信息，得到了里边这个字符串的内容； 并且git对文件内容进行了哈希，得到了这个哈希值，作为文件名。 我们可以使用git cat-file -p查看内容，使用git cat-file -t查看文件类型 1234567$ git cat-file -t 0495 &amp;&amp; git cat-file -p 0495 blob 1.2.3 $ git cat-file -t bb8d &amp;&amp; git cat-file -p bb8d blob 4.5.6 两个object文件都是Blob类型（二进制文件），内容分别是a.txt(b.txt)和c.txt的内容。 明显，这两个文件就存储了我们的文本信息，这也就是git存储的真正的文本信息。 这时候突然想到了，我们有三个文件啊，看起来很明显了，git对两个相同的文件求哈希以后发现文件相同，因此只保存了一份在数据库里。 Git三个区域git分为三个区域，分别为 工作区：]]></content>
+    <content type="text"><![CDATA[今天学习了一点git的实现原理，稍微记录一下 before all我们先来新建一个测试仓库，就叫test吧，使用git init来初始化这个仓库。 现在这个仓库是全空的，打开.git文件夹，发现里边有文件夹，但是objects啊refs啊都是空的； 1234567...+---objects| +---info| \---pack\---refs +---heads \---tags 我们就从这个仓库开始讲吧 git存储原理我们新建几个文件试一下，新建3个文件，a.txt，b.txt，c.txt，其中a和b的内容是一样的 1234$ cat a.txt b.txt c.txt1.2.3 1.2.34.5.6 然后我们使用 git add * 命令，然后再次查看.git文件夹 123456789101112+---objects| +---04| | 95c4a88caed0f036ffab0948c17d4b5fdc96c1| || +---bb| | 8dc6360fdfeabbafe0681b258a816b259a6048| || +---info| \---pack\---refs +---heads \---tags 看！多出来两个object文件，这两个文件内容是什么呢 123/d/test/.git/objects/04 (GIT_DIR!)$ cat 95c4a88caed0f036ffab0948c17d4b5fdc96c1 xK??OR0c0?3?3? N 发现不是明文的，这是因为 git将文件内容进行了压缩处理，并且加入了一些自己管理所需的信息，得到了里边这个字符串的内容； 并且git对文件内容进行了哈希，得到了这个哈希值，作为文件名。 我们可以使用git cat-file -p查看内容，使用git cat-file -t查看文件类型 1234567$ git cat-file -t 0495 &amp;&amp; git cat-file -p 0495 blob 1.2.3 $ git cat-file -t bb8d &amp;&amp; git cat-file -p bb8d blob 4.5.6 两个object文件都是Blob类型（二进制文件），内容分别是a.txt(b.txt)和c.txt的内容。 明显，这两个文件就存储了我们的文本信息，这也就是git存储的真正的文本信息。 这时候突然想到了，我们有三个文件啊，看起来很明显了，git对两个相同的文件求哈希以后发现文件相同，因此只保存了一份在数据库里。 Git三个区域git分为三个区域，分别为 工作区：就是敲代码的时候，代码都存在工作区里； 暂存区：这个就是使用了git add，然后会把这部分代码暂存起来； git仓库：这就是最终的存储地方了 未完待续]]></content>
+      <categories>
+        <category>git</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
   </entry>
   <entry>
     <title><![CDATA[alias 如何带参数]]></title>
@@ -176,32 +182,7 @@
       </categories>
       <tags>
         <tag>LeetCode</tag>
-        <tag>Algorithm</tag>
         <tag>Array</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[Leetcode 264. Ugly Number II]]></title>
-    <url>%2Fposts%2FLeetcode%20264.%20Ugly%20Number%20II-2019-03-07%2F</url>
-    <content type="text"><![CDATA[Write a program to find the n-th ugly number. Ugly numbers are positive numbers whose prime factors only include 2, 3, 5. Example: 123Input: n = 10Output: 12Explanation: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12 is the sequence of the first 10 ugly numbers. Note: 1 is typically treated as an ugly number. n does not exceed 1690. Solution123456789101112131415class Solution &#123;public: int nthUglyNumber(int n) &#123; int i2 = 0, i3 = 0, i5 = 0; vector&lt;int&gt; dp &#123;1&#125;; for (int i = 0; i &lt; n; i++) &#123; int m = min( min(dp[i2]*2, dp[i3]*3), dp[i5]*5 ); dp.push_back(m); if (m == dp[i2]*2) i2++; if (m == dp[i3]*3) i3++; if (m == dp[i5]*5) i5++; &#125; return dp[n-1]; &#125;&#125;; 题解应该大家看着还是挺迷茫的，我们从题目开始思考，要找的是质因数只有2、3、5的数，那么我们可以产生两种思路，一种是验证的思路，对于每个数进行验证，判断他是否有2、3、5之外的质因子；或者是采用构造的思路，从某个数开始构造满足这个条件的数字。 明显第一种思路耗时很久，毕竟现在还是没有很好地判断因子分解的算法。从另一种思路出发，我们可以这样考虑：所有以2、3、5为因子的数相乘并不会产生其他的素数作为因子，我们可以简单地推导一下 很明显素数 $p$ 和 $q$ 相乘时，$pq$不存在其他的素数作为它的因子； $ p^i q^j $明显也没有其他素数作为因子 因此这个算法应该是成立的！ 因此，又为了排序的目的，我们逐个取最小值产生ugly number的数组。 如下： 1234567t2 = 0, t3 = 0, t5 = 0 uglg numbers [0] = 1for i from 1 to n uglg numbers [i] = min( uglg numbers [t2], uglg numbers [t3], uglg numbers [t5])return uglg numbers [n-1]]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>LeetCode</tag>
-        <tag>Algorithm</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[Leetcode 97. Interleaving String]]></title>
-    <url>%2Fposts%2FLeetcode%2097.%20Interleaving%20String-2019-03-07%2F</url>
-    <content type="text"><![CDATA[Given s1, s2, s3, find whether s3 is formed by the interleaving of s1 and s2. Example 1: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbcbcac&quot;Output: true Example 2: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbbaccc&quot;Output: false 题解使用动态规划求解。 首先我们分解子问题。如果s3是s1和s2的交错字符串的话，那么一定有以下的一种情况 s3的最后一位和s2的最后一位相同，此时s3前边的子串(除去最后一位)一定是s2的前边的子串与s1的交错字符串。 s3的最后一位和s1的最后一位相同，此时s3前边的子串(除去最后一位)一定是s1的前边的子串与s2的交错字符串。 这个很容易想到，因为构造出交错的字符串的时候肯定是从s1选1个char，又从s2选1个char，所以如果当前是交错的串的话，去掉最后一位相同的位之后，前边的串肯定也是根据这个规则构造来的，所以也是交错的字符串。 因此我们可以写出迭代方程： length·of·s3 = l \\ length·of·s2 = n \\ length·of·s1 = m \\ isInterleave(s3[0...l]) = \\ (s3[l] == s2[n] ^ isInterleave(s1[0...m], s2[0...n-1], s3[0...l-1])) \\ or (s3[l] == s1[m] ^ isInterleave(s1[0...m-1], s2[0...n], s3[0...l-1])) \\基于此方程我们写出如下的解： Solution12345678910111213141516171819202122232425class Solution &#123;public: bool isInterleave(string s1, string s2, string s3) &#123; int m = s1.length(), n = s2.length(), l = s3.length(); if (m + n != l) return false; vector&lt;vector&lt;bool&gt;&gt; dp(m+1, vector&lt;bool&gt;(n+1, false)); for (int i = 0; i &lt; m+1; i++) &#123; for (int j = 0; j &lt; n+1; j++) &#123; if (i == 0 &amp;&amp; j == 0) dp[0][0] = true; else if (i == 0) dp[i][j] = dp[i][j-1] &amp;&amp; s2[j-1] == s3[i+j-1]; // when i = 0, j = 1 // dp[0][1] = dp[0][0] and s2[1] == s3[1] else if (j == 0) dp[i][j] = dp[i-1][j] &amp;&amp; s1[i-1] == s3[i+j-1]; // when i = 1, j = 0 // dp[1][0] = dp[0][0] and s1[1] == s3[1] else dp[i][j] = (dp[i-1][j] &amp;&amp; s1[i-1]==s3[i+j-1]) || (dp[i][j-1] &amp;&amp; s2[j-1]==s3[i+j-1]); // when i = 1, j = 1 // dp[1][1] = // | dp[0][1] &amp;&amp; s1[1] == s3[2] // | dp[1][0] &amp;&amp; s2[1] == s3[1] &#125; &#125; return dp[m][n]; &#125;&#125;;]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>LeetCode</tag>
-        <tag>String</tag>
         <tag>Algorithm</tag>
       </tags>
   </entry>
@@ -214,7 +195,32 @@
       </categories>
       <tags>
         <tag>LeetCode</tag>
+        <tag>Algorithm</tag>
         <tag>String</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Leetcode 97. Interleaving String]]></title>
+    <url>%2Fposts%2FLeetcode%2097.%20Interleaving%20String-2019-03-07%2F</url>
+    <content type="text"><![CDATA[Given s1, s2, s3, find whether s3 is formed by the interleaving of s1 and s2. Example 1: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbcbcac&quot;Output: true Example 2: 12Input: s1 = &quot;aabcc&quot;, s2 = &quot;dbbca&quot;, s3 = &quot;aadbbbaccc&quot;Output: false 题解使用动态规划求解。 首先我们分解子问题。如果s3是s1和s2的交错字符串的话，那么一定有以下的一种情况 s3的最后一位和s2的最后一位相同，此时s3前边的子串(除去最后一位)一定是s2的前边的子串与s1的交错字符串。 s3的最后一位和s1的最后一位相同，此时s3前边的子串(除去最后一位)一定是s1的前边的子串与s2的交错字符串。 这个很容易想到，因为构造出交错的字符串的时候肯定是从s1选1个char，又从s2选1个char，所以如果当前是交错的串的话，去掉最后一位相同的位之后，前边的串肯定也是根据这个规则构造来的，所以也是交错的字符串。 因此我们可以写出迭代方程： length·of·s3 = l \\ length·of·s2 = n \\ length·of·s1 = m \\ isInterleave(s3[0...l]) = \\ (s3[l] == s2[n] ^ isInterleave(s1[0...m], s2[0...n-1], s3[0...l-1])) \\ or (s3[l] == s1[m] ^ isInterleave(s1[0...m-1], s2[0...n], s3[0...l-1])) \\基于此方程我们写出如下的解： Solution12345678910111213141516171819202122232425class Solution &#123;public: bool isInterleave(string s1, string s2, string s3) &#123; int m = s1.length(), n = s2.length(), l = s3.length(); if (m + n != l) return false; vector&lt;vector&lt;bool&gt;&gt; dp(m+1, vector&lt;bool&gt;(n+1, false)); for (int i = 0; i &lt; m+1; i++) &#123; for (int j = 0; j &lt; n+1; j++) &#123; if (i == 0 &amp;&amp; j == 0) dp[0][0] = true; else if (i == 0) dp[i][j] = dp[i][j-1] &amp;&amp; s2[j-1] == s3[i+j-1]; // when i = 0, j = 1 // dp[0][1] = dp[0][0] and s2[1] == s3[1] else if (j == 0) dp[i][j] = dp[i-1][j] &amp;&amp; s1[i-1] == s3[i+j-1]; // when i = 1, j = 0 // dp[1][0] = dp[0][0] and s1[1] == s3[1] else dp[i][j] = (dp[i-1][j] &amp;&amp; s1[i-1]==s3[i+j-1]) || (dp[i][j-1] &amp;&amp; s2[j-1]==s3[i+j-1]); // when i = 1, j = 1 // dp[1][1] = // | dp[0][1] &amp;&amp; s1[1] == s3[2] // | dp[1][0] &amp;&amp; s2[1] == s3[1] &#125; &#125; return dp[m][n]; &#125;&#125;;]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>Algorithm</tag>
+        <tag>String</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Leetcode 264. Ugly Number II]]></title>
+    <url>%2Fposts%2FLeetcode%20264.%20Ugly%20Number%20II-2019-03-07%2F</url>
+    <content type="text"><![CDATA[Write a program to find the n-th ugly number. Ugly numbers are positive numbers whose prime factors only include 2, 3, 5. Example: 123Input: n = 10Output: 12Explanation: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12 is the sequence of the first 10 ugly numbers. Note: 1 is typically treated as an ugly number. n does not exceed 1690. Solution123456789101112131415class Solution &#123;public: int nthUglyNumber(int n) &#123; int i2 = 0, i3 = 0, i5 = 0; vector&lt;int&gt; dp &#123;1&#125;; for (int i = 0; i &lt; n; i++) &#123; int m = min( min(dp[i2]*2, dp[i3]*3), dp[i5]*5 ); dp.push_back(m); if (m == dp[i2]*2) i2++; if (m == dp[i3]*3) i3++; if (m == dp[i5]*5) i5++; &#125; return dp[n-1]; &#125;&#125;; 题解应该大家看着还是挺迷茫的，我们从题目开始思考，要找的是质因数只有2、3、5的数，那么我们可以产生两种思路，一种是验证的思路，对于每个数进行验证，判断他是否有2、3、5之外的质因子；或者是采用构造的思路，从某个数开始构造满足这个条件的数字。 明显第一种思路耗时很久，毕竟现在还是没有很好地判断因子分解的算法。从另一种思路出发，我们可以这样考虑：所有以2、3、5为因子的数相乘并不会产生其他的素数作为因子，我们可以简单地推导一下 很明显素数 $p$ 和 $q$ 相乘时，$pq$不存在其他的素数作为它的因子； $ p^i q^j $明显也没有其他素数作为因子 因此这个算法应该是成立的！ 因此，又为了排序的目的，我们逐个取最小值产生ugly number的数组。 如下： 1234567t2 = 0, t3 = 0, t5 = 0 uglg numbers [0] = 1for i from 1 to n uglg numbers [i] = min( uglg numbers [t2], uglg numbers [t3], uglg numbers [t5])return uglg numbers [n-1]]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
         <tag>Algorithm</tag>
       </tags>
   </entry>

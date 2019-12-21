@@ -99,13 +99,14 @@
 
 
   <meta name="description" content="今天学习了一点git的实现原理，稍微记录一下">
+<meta name="keywords" content="git">
 <meta property="og:type" content="article">
 <meta property="og:title" content="git实现原理">
 <meta property="og:url" content="https://gongzq5.github.io/posts/git实现原理-2019-12-13/index.html">
 <meta property="og:site_name" content="Gongzq&#39;s blog">
 <meta property="og:description" content="今天学习了一点git的实现原理，稍微记录一下">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-12-13T05:09:43.347Z">
+<meta property="og:updated_time" content="2019-12-21T01:47:13.032Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="git实现原理">
 <meta name="twitter:description" content="今天学习了一点git的实现原理，稍微记录一下">
@@ -484,6 +485,24 @@
           </span>
 
           
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/git/" itemprop="url" rel="index"><span itemprop="name">git</span></a></span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -560,9 +579,11 @@
 <p>这时候突然想到了，我们有三个文件啊，看起来很明显了，git对两个相同的文件求哈希以后发现文件相同，因此只保存了一份在数据库里。</p>
 <h1 id="Git三个区域"><a href="#Git三个区域" class="headerlink" title="Git三个区域"></a><code>Git</code>三个区域</h1><p><code>git</code>分为三个区域，分别为</p>
 <ul>
-<li>工作区：</li>
+<li>工作区：就是敲代码的时候，代码都存在工作区里；</li>
+<li>暂存区：这个就是使用了<code>git add</code>，然后会把这部分代码暂存起来；</li>
+<li>git仓库：这就是最终的存储地方了</li>
 </ul>
-
+<h1 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h1>
       
     </div>
 
@@ -611,6 +632,12 @@
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/git/" rel="tag"># git</a>
+          
+        </div>
       
 
       
@@ -749,7 +776,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">12</span>
+                      
+                    
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -818,7 +847,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">26</span>
+                      
+                    
+                    <span class="site-state-item-count">27</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -880,7 +911,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#before-all"><span class="nav-number">1.</span> <span class="nav-text">before all</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#git存储原理"><span class="nav-number">2.</span> <span class="nav-text">git存储原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Git三个区域"><span class="nav-number">3.</span> <span class="nav-text">Git三个区域</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#before-all"><span class="nav-number">1.</span> <span class="nav-text">before all</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#git存储原理"><span class="nav-number">2.</span> <span class="nav-text">git存储原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Git三个区域"><span class="nav-number">3.</span> <span class="nav-text">Git三个区域</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#未完待续"><span class="nav-number">4.</span> <span class="nav-text">未完待续</span></a></li></ol></div>
             
 
           </div>

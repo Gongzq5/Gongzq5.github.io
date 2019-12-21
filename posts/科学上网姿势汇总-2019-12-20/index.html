@@ -107,7 +107,7 @@
 <meta property="og:description" content="汇总一下各种姿势，不然每次部署梯子都要单独找教程；三个： ShadowSocks, SSR, v2ray SS基本GG了，用一用就没了，怪费IP的；V2Ray号称无敌然而我就没成功过= =；现在用SSR是可以的； 估计是校园网的问题吧，大家可以都试试">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://www.wogaosuni.com/upload/attach/201906/1_5Y29RJEVG5PN8KR.jpg">
-<meta property="og:updated_time" content="2019-12-20T13:13:11.812Z">
+<meta property="og:updated_time" content="2019-12-21T01:44:59.959Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="科学上网姿势汇总">
 <meta name="twitter:description" content="汇总一下各种姿势，不然每次部署梯子都要单独找教程；三个： ShadowSocks, SSR, v2ray SS基本GG了，用一用就没了，怪费IP的；V2Ray号称无敌然而我就没成功过= =；现在用SSR是可以的； 估计是校园网的问题吧，大家可以都试试">
@@ -561,6 +561,11 @@
 <p>SS基本GG了，用一用就没了，怪费IP的；V2Ray号称无敌然而我就没成功过= =；现在用SSR是可以的；</p>
 <p>估计是校园网的问题吧，大家可以都试试</p>
 <a id="more"></a>
+<h2 id="写在前边【基本配置条件介绍】"><a href="#写在前边【基本配置条件介绍】" class="headerlink" title="写在前边【基本配置条件介绍】"></a>写在前边【基本配置条件介绍】</h2><p>介绍一下我的基本配置信息</p>
+<p>我的<strong>VPS</strong>是在<strong>vultr</strong>上购买的，买最便宜的套餐就好了。但是买只有ipv6的好像有点问题，推荐还是找$3.5的购买。现在是在<strong>New York (NJ)</strong> 这个地区有。当然也可以买日本/新加坡的，就是要稍微贵点，延迟要低很多(200+ms -&gt; 100-ms)，但是这两个地区的IP被封的比较严重。大家自己考虑</p>
+<p>服务端系统一般是<strong>Ubuntu 16/18</strong>，基本是一样的，为了稳定的话还是选用16吧，现在支持16的比较多（本文时间是 2019/12/20哈）</p>
+<p>PC客户端我肯定是用在<strong>win10</strong>下的；</p>
+<p>手机客户端我是<strong>iOS</strong>，用美区账号下载的<strong>Potatso Lite</strong>，<strong>支持SS和SSR</strong>。但是！！<strong>不支持V2ray</strong>，v2ray这个东西的iOS客户端都要花钱，emmm反正我也不能用，就直接放弃了</p>
 <h2 id="ShadowSocks"><a href="#ShadowSocks" class="headerlink" title="ShadowSocks"></a>ShadowSocks</h2><h3 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h3><p>小飞机主要是使用<strong>teddysun</strong>的部署脚本</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget –no-check-certificate  https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks.sh</span><br></pre></td></tr></table></figure>
 <p>然后加个权限，然后执行脚本部署</p>
@@ -792,7 +797,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">12</span>
+                      
+                    
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -861,7 +868,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">26</span>
+                      
+                    
+                    <span class="site-state-item-count">27</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -923,7 +932,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ShadowSocks"><span class="nav-number">1.</span> <span class="nav-text">ShadowSocks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端"><span class="nav-number">1.1.</span> <span class="nav-text">服务端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端"><span class="nav-number">1.2.</span> <span class="nav-text">客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSR"><span class="nav-number">2.</span> <span class="nav-text">SSR</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端-1"><span class="nav-number">2.1.</span> <span class="nav-text">服务端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端-1"><span class="nav-number">2.2.</span> <span class="nav-text">客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V2Ray"><span class="nav-number">3.</span> <span class="nav-text">V2Ray</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端-2"><span class="nav-number">3.1.</span> <span class="nav-text">服务端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#命令行部署脚本【首选】"><span class="nav-number">3.1.1.</span> <span class="nav-text">命令行部署脚本【首选】</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#web界面部署【可以尝试】"><span class="nav-number">3.1.2.</span> <span class="nav-text">web界面部署【可以尝试】</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端-2"><span class="nav-number">3.2.</span> <span class="nav-text">客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署BBR加速"><span class="nav-number">4.</span> <span class="nav-text">部署BBR加速</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于在Linux下使用客户端的用户"><span class="nav-number">5.</span> <span class="nav-text">关于在Linux下使用客户端的用户</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#写在前边【基本配置条件介绍】"><span class="nav-number">1.</span> <span class="nav-text">写在前边【基本配置条件介绍】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ShadowSocks"><span class="nav-number">2.</span> <span class="nav-text">ShadowSocks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端"><span class="nav-number">2.1.</span> <span class="nav-text">服务端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端"><span class="nav-number">2.2.</span> <span class="nav-text">客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSR"><span class="nav-number">3.</span> <span class="nav-text">SSR</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端-1"><span class="nav-number">3.1.</span> <span class="nav-text">服务端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端-1"><span class="nav-number">3.2.</span> <span class="nav-text">客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V2Ray"><span class="nav-number">4.</span> <span class="nav-text">V2Ray</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端-2"><span class="nav-number">4.1.</span> <span class="nav-text">服务端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#命令行部署脚本【首选】"><span class="nav-number">4.1.1.</span> <span class="nav-text">命令行部署脚本【首选】</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#web界面部署【可以尝试】"><span class="nav-number">4.1.2.</span> <span class="nav-text">web界面部署【可以尝试】</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端-2"><span class="nav-number">4.2.</span> <span class="nav-text">客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署BBR加速"><span class="nav-number">5.</span> <span class="nav-text">部署BBR加速</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于在Linux下使用客户端的用户"><span class="nav-number">6.</span> <span class="nav-text">关于在Linux下使用客户端的用户</span></a></li></ol></div>
             
 
           </div>
