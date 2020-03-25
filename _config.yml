@@ -3,13 +3,13 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Gongzq's blog
-subtitle: simple ^_^
-description: nothing to descript
+title: Glog
+subtitle: Aka G's Blog
+description: 不过是遇山开路，遇水搭桥罢了
 keywords: 
-author: GongZequn
+author: Glog
 language: zh-CN
-timezone:
+timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
