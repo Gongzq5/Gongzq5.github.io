@@ -86,6 +86,5 @@ search:
 deploy:
   type: git
   repo:
-    github: https://github.com/gongzq5/gongzq5.github.io
-    coding: https://git.dev.tencent.com/Gongzq5/gongzq5.git
+    github: git@github.com:Gongzq5/Gongzq5.github.io.git
   message: #leave this blank
