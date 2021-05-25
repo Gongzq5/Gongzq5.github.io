@@ -101,7 +101,7 @@
   <meta name="description" content="不过是遇山开路，遇水搭桥罢了">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Glog">
-<meta property="og:url" content="https://gongzq5.github.io/categories/LeetCode/index.html">
+<meta property="og:url" content="https://gongzq5.github.io/categories/Leetcode/index.html">
 <meta property="og:site_name" content="Glog">
 <meta property="og:description" content="不过是遇山开路，遇水搭桥罢了">
 <meta property="og:locale" content="zh-CN">
@@ -114,7 +114,7 @@
 
 
 
-  <link rel="canonical" href="https://gongzq5.github.io/categories/LeetCode/">
+  <link rel="canonical" href="https://gongzq5.github.io/categories/Leetcode/">
 
 
 
@@ -124,7 +124,7 @@
   };
 </script>
 
-  <title>分类: LeetCode | Glog</title>
+  <title>分类: Leetcode | Glog</title>
   
 
 
@@ -455,7 +455,7 @@
 
     <div id="posts" class="posts-collapse">
       <div class="collection-title">
-        <h1>LeetCode<small>分类</small>
+        <h1>Leetcode<small>分类</small>
         </h1>
       </div>
 
@@ -467,17 +467,17 @@
 
       <h2 class="post-title">
         
-          <a class="post-title-link" href="/posts/Leetcode 264. Ugly Number II-2019-03-07/" itemprop="url">
+          <a class="post-title-link" href="/posts/LeetCode-11-Container-With-Most-Water-2020-02-14/" itemprop="url">
             
-              <span itemprop="name">Leetcode 264. Ugly Number II</span>
+              <span itemprop="name">LeetCode 11. Container With Most Water</span>
             
           </a>
         
       </h2>
 
       <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-03-07T00:00:00+08:00" content="2019-03-07">
-          03-07
+        <time class="post-time" itemprop="dateCreated" datetime="2020-02-14T15:29:10+08:00" content="2020-02-14">
+          02-14
         </time>
       </div>
 
@@ -493,69 +493,17 @@
 
       <h2 class="post-title">
         
-          <a class="post-title-link" href="/posts/Leetcode 152. Maximum Product Subarray-2019-03-07/" itemprop="url">
+          <a class="post-title-link" href="/posts/Leetcode-206-Reverse-Linked-List-2019-10-09/" itemprop="url">
             
-              <span itemprop="name">Leetcode 152. Maximum Product Subarray</span>
-            
-          </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-03-07T00:00:00+08:00" content="2019-03-07">
-          03-07
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-          <a class="post-title-link" href="/posts/LeetCode 87. Scramble String-2019-03-07/" itemprop="url">
-            
-              <span itemprop="name">LeetCode 87. Scramble String</span>
+              <span itemprop="name">Leetcode 206. Reverse Linked List</span>
             
           </a>
         
       </h2>
 
       <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-03-07T00:00:00+08:00" content="2019-03-07">
-          03-07
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-          <a class="post-title-link" href="/posts/Leetcode 97. Interleaving String-2019-03-07/" itemprop="url">
-            
-              <span itemprop="name">Leetcode 97. Interleaving String</span>
-            
-          </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-03-07T00:00:00+08:00" content="2019-03-07">
-          03-07
+        <time class="post-time" itemprop="dateCreated" datetime="2019-10-09T20:53:20+08:00" content="2019-10-09">
+          10-09
         </time>
       </div>
 
@@ -1339,6 +1287,80 @@
             $(element).find(COUNT_CONTAINER_REF).text(time);
           }
           for (var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if (countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log('LeanCloud Counter Error: ' + responseJSON.code + ' ' + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + 't7Oa6gbyt2bTT0T0mQHBAiIV-gzGzoHsz')
+        .done(function({ api_server }) {
+          var Counter = function(method, url, data) {
+            return $.ajax({
+              method: method,
+              url: 'https://' + api_server + '/1.1' + url,
+              headers: {
+                'X-LC-Id': 't7Oa6gbyt2bTT0T0mQHBAiIV-gzGzoHsz',
+                'X-LC-Key': '73JTf8PJIrc8OayEy07qsKJ4',
+                'Content-Type': 'application/json',
+              },
+              data: data
+            });
+          };
+          
+            if ($('.post-title-link').length >= 1) {
+              showTime(Counter);
+            }
+          
+        });
+    });
+  </script>
+
+
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
+gth; i++) {
             var url = entries[i];
             var element = document.getElementById(url);
             var countSpan = $(element).find(COUNT_CONTAINER_REF);
